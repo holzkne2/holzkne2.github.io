@@ -1,0 +1,9 @@
+{
+"TOTAL_MEMORY": 268435456,
+"dataUrl": "ArtSmashTestServer.data.unityweb",
+"asmCodeUrl": "ArtSmashTestServer.asm.code.unityweb",
+"asmMemoryUrl": "ArtSmashTestServer.asm.memory.unityweb",
+"asmFrameworkUrl": "ArtSmashTestServer.asm.framework.unityweb",
+"splashScreenStyle": "Dark",
+"backgroundColor": "#222C36"
+}
