@@ -87,6 +87,7 @@ function initShaders() {
     shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
     shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
     shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
+    shaderProgram.alphaUniform = gl.getUniformLocation(shaderProgram, "uAlpha");
 }
 
 
@@ -113,7 +114,7 @@ function initTexture() {
         handleLoadedTexture(mainTexture)
     }
 
-	mainTexture.image.src = "Texture.png";
+	mainTexture.image.src = "glass.gif";
 }
 
 
@@ -375,6 +376,17 @@ function drawScene() {
     gl.bindTexture(gl.TEXTURE_2D, mainTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
 
+    var blending = document.getElementById("blending").checked;
+    if (blending) {
+    	gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    	gl.enable(gl.BLEND);
+    	gl.disable(gl.DEPTH_TEST);
+    	gl.uniform1f(shaderProgram.alphaUniform, parseFloat(document.getElementById("alpha").value));
+    } else {
+        gl.disable(gl.BLEND);
+        gl.enable(gl.DEPTH_TEST);
+    }
+    
     var lighting = document.getElementById("lighting").checked;
     gl.uniform1i(shaderProgram.useLightingUniform, lighting);
     if (lighting) {
