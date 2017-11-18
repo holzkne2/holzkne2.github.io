@@ -1,8 +1,8 @@
 class GameObject {	
 	constructor(name) {
-		this.position = [0, 0, 0];
-		this.rotation = [0, 0, 0, 1];
-		this.scale = [1, 1, 1];
+		this.position = vec3.create([0, 0, 0]);
+		this.rotation = quat4.create([0, 0, 0, 1]);
+		this.scale = vec3.create([1, 1, 1]);
 		
 		this.name = name;
 		

@@ -313,7 +313,12 @@ function drawScene() {
 	    mat4.identity(mvMatrix);
 	    
 	    mat4.translate(mvMatrix, scene.gameObjects[i].position);
-	    //TODO: Convert Quaternions to Matrix
+	    
+	    rotationMatrix = mat4.create();
+	    mat4.identity(rotationMatrix)
+	    quat4.toMat4(scene.gameObjects[i].rotation, rotationMatrix);
+	    mat4.multiply(mvMatrix, rotationMatrix);
+	    
 	    mat4.scale(mvMatrix, scene.gameObjects[i].scale);
 	
 	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
@@ -384,10 +389,13 @@ function webGLStart() {
     var canvas = document.getElementById("Game-canvas");
     initGL(canvas);
     
-    scene = new Scene();
+    scene = new Scene()
     for (var i = -1; i < 2; i++) {
     	var obj = new GameObject();
-    	obj.position = [i * 3, 0, -7];
+    	obj.position = vec3.create([i * 3, 0, -7]);
+    	quat4.normalize(quat4.create([Math.random(),
+    				Math.random(), Math.random(), Math.random()]),
+    				obj.rotation);
     	scene.AddGameObject(obj);
     }
     
