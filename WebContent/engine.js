@@ -16,32 +16,30 @@ function initGL(canvas) {
     }
 }
 
-
-function getShader(gl, id) {
-    var shaderScript = document.getElementById(id);
-    if (!shaderScript) {
+function altLoad() {
+	var shader = gl.createShader(gl.VERTEX_SHADER);
+	gl.shaderSource(shader, vertexShaderSource);
+    gl.compileShader(shader);
+    
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(shader));
         return null;
     }
 
-    var str = "";
-    var k = shaderScript.firstChild;
-    while (k) {
-        if (k.nodeType == 3) {
-            str += k.textContent;
-        }
-        k = k.nextSibling;
-    }
+    return shader;
+}
 
+function getShader(source, id) {
     var shader;
-    if (shaderScript.type == "x-shader/x-fragment") {
+    if (id == "x-shader/x-fragment") {
         shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
+    } else if (id == "x-shader/x-vertex") {
         shader = gl.createShader(gl.VERTEX_SHADER);
     } else {
         return null;
     }
 
-    gl.shaderSource(shader, str);
+    gl.shaderSource(shader, source);
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -56,9 +54,9 @@ function getShader(gl, id) {
 var shaderProgram;
 
 function initShaders() {
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
-
+    var fragmentShader = getShader(fragmentShaderSource, "x-shader/x-fragment");
+    var vertexShader = getShader(vertexShaderSource, "x-shader/x-vertex");
+    
     shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
@@ -375,7 +373,7 @@ function drawScene() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, mainTexture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
-
+    
     var blending = document.getElementById("blending").checked;
     if (blending) {
     	gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
