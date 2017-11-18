@@ -3,6 +3,7 @@
  */
 
 var gl;
+var scene;
 
 function initGL(canvas) {
     try {
@@ -14,19 +15,6 @@ function initGL(canvas) {
     if (!gl) {
         alert("Could not initialise WebGL, sorry :-(");
     }
-}
-
-function altLoad() {
-	var shader = gl.createShader(gl.VERTEX_SHADER);
-	gl.shaderSource(shader, vertexShaderSource);
-    gl.compileShader(shader);
-    
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
-
-    return shader;
 }
 
 function getShader(source, id) {
@@ -112,7 +100,7 @@ function initTexture() {
         handleLoadedTexture(mainTexture)
     }
 
-	mainTexture.image.src = "glass.gif";
+	mainTexture.image.src = "Texture.png";
 }
 
 
@@ -149,16 +137,6 @@ function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
 
-var xRot = 0;
-var xSpeed = 0;
-
-var yRot = 0;
-var ySpeed = 0;
-
-var z = -5.0;
-
-var filter = 0;
-
 var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
@@ -177,30 +155,6 @@ function handleKeyUp(event) {
 }
 
 function handleKeys() {
-	if (currentlyPressedKeys[33]) {
-        // Page Up
-        z -= 0.05;
-    }
-    if (currentlyPressedKeys[34]) {
-        // Page Down
-        z += 0.05;
-    }
-    if (currentlyPressedKeys[37]) {
-        // Left cursor key
-        ySpeed -= 1;
-    }
-    if (currentlyPressedKeys[39]) {
-        // Right cursor key
-        ySpeed += 1;
-    }
-    if (currentlyPressedKeys[38]) {
-        // Up cursor key
-        xSpeed -= 1;
-    }
-    if (currentlyPressedKeys[40]) {
-        // Down cursor key
-        xSpeed += 1;
-    }
 }
 
 var cubeVertexPositionBuffer;
@@ -352,71 +306,58 @@ function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    mat4.perspective(70, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
-    mat4.identity(mvMatrix);
-
-    mat4.translate(mvMatrix, [0.0, 0.0, z]);
-
-    mat4.rotate(mvMatrix, degToRad(xRot), [1, 0, 0]);
-    mat4.rotate(mvMatrix, degToRad(yRot), [0, 1, 0]);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, mainTexture);
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
-    
-    var blending = document.getElementById("blending").checked;
-    if (blending) {
-    	gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-    	gl.enable(gl.BLEND);
-    	gl.disable(gl.DEPTH_TEST);
-    	gl.uniform1f(shaderProgram.alphaUniform, parseFloat(document.getElementById("alpha").value));
-    } else {
-        gl.disable(gl.BLEND);
-        gl.enable(gl.DEPTH_TEST);
+    for (var i = 0; i < scene.gameObjects.length; i++)
+    {
+	    mat4.identity(mvMatrix);
+	    
+	    mat4.translate(mvMatrix, scene.gameObjects[i].position);
+	    //TODO: Convert Quaternions to Matrix
+	    mat4.scale(mvMatrix, scene.gameObjects[i].scale);
+	
+	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+	    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	
+	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+	    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    
+	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
+	    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	
+	    gl.activeTexture(gl.TEXTURE0);
+	    gl.bindTexture(gl.TEXTURE_2D, mainTexture);
+	    gl.uniform1i(shaderProgram.samplerUniform, 0);
+	    
+		gl.uniform3f(
+				shaderProgram.ambientColorUniform,
+				parseFloat(document.getElementById("ambientR").value),
+	            parseFloat(document.getElementById("ambientG").value),
+	            parseFloat(document.getElementById("ambientB").value)
+				);
+		
+		var lightingDirection = [
+	        parseFloat(document.getElementById("lightDirectionX").value),
+	        parseFloat(document.getElementById("lightDirectionY").value),
+	        parseFloat(document.getElementById("lightDirectionZ").value)
+	    ];
+		
+		var adjustedLD = vec3.create();
+	    vec3.normalize(lightingDirection, adjustedLD);
+	    vec3.scale(adjustedLD, -1);
+	    gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+	    
+	    gl.uniform3f(
+	        shaderProgram.directionalColorUniform,
+	        parseFloat(document.getElementById("directionalR").value),
+	        parseFloat(document.getElementById("directionalG").value),
+	        parseFloat(document.getElementById("directionalB").value)
+	    );
+	    
+	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+	    setMatrixUniforms();
+	    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
-    
-    var lighting = document.getElementById("lighting").checked;
-    gl.uniform1i(shaderProgram.useLightingUniform, lighting);
-    if (lighting) {
-    	gl.uniform3f(
-    			shaderProgram.ambientColorUniform,
-    			parseFloat(document.getElementById("ambientR").value),
-                parseFloat(document.getElementById("ambientG").value),
-                parseFloat(document.getElementById("ambientB").value)
-    			);
-    	
-    	var lightingDirection = [
-            parseFloat(document.getElementById("lightDirectionX").value),
-            parseFloat(document.getElementById("lightDirectionY").value),
-            parseFloat(document.getElementById("lightDirectionZ").value)
-        ];
-    	
-    	var adjustedLD = vec3.create();
-        vec3.normalize(lightingDirection, adjustedLD);
-        vec3.scale(adjustedLD, -1);
-        gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
-        
-        gl.uniform3f(
-            shaderProgram.directionalColorUniform,
-            parseFloat(document.getElementById("directionalR").value),
-            parseFloat(document.getElementById("directionalG").value),
-            parseFloat(document.getElementById("directionalB").value)
-        );
-    }
-    
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-    setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 
@@ -426,9 +367,7 @@ function animate() {
     var timeNow = new Date().getTime();
     if (lastTime != 0) {
         var elapsed = timeNow - lastTime;
-
-        xRot += (xSpeed * elapsed) / 1000.0;
-        yRot += (ySpeed * elapsed) / 1000.0;
+        
     }
     lastTime = timeNow;
 }
@@ -444,6 +383,14 @@ function tick() {
 function webGLStart() {
     var canvas = document.getElementById("Game-canvas");
     initGL(canvas);
+    
+    scene = new Scene();
+    for (var i = -1; i < 2; i++) {
+    	var obj = new GameObject();
+    	obj.position = [i * 3, 0, -7];
+    	scene.AddGameObject(obj);
+    }
+    
     initShaders();
     initBuffers();
     initTexture();
