@@ -50,9 +50,13 @@ function drawScene() {
 
     for (var i = 0; i < scene.gameObjects.length; i++)
     {
+    	var renderer = scene.gameObjects[i].meshRenderer;
+    	if (typeof renderer == 'undefined') {
+    		continue;
+    	}
+    	
 	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
 	
-	    var renderer = scene.gameObjects[i].meshRenderer;
 	    
 	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexPositionBuffer);
 	    gl.vertexAttribPointer(renderer.material.shaderProgram.vertexPositionAttribute, renderer.mesh.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -163,5 +167,6 @@ function webGLStart() {
     
     window.addEventListener('resize', resizeCanvas, false);
     
+    document.getElementById("loadingtext").textContent = "";
     tick();
 }

@@ -4,3 +4,5 @@
 html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
 
 canvas { display:block; } /* To remove the scrollbars */
+
+#loadingtext { position:absolute; top:50%; width: 100%; font-size:4em; color: blue; text-align: center; }
