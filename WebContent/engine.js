@@ -13,7 +13,7 @@ function initGL(canvas) {
     } catch (e) {
     }
     if (!gl) {
-        alert("Could not initialise WebGL, sorry :-(");
+        alert("Could not initialise WebGL!");
     }
 }
 
@@ -46,8 +46,10 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     var pMatrix = mat4.create();
-    mat4.perspective(70, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    scene.camera.perspective(gl.viewportWidth / gl.viewportHeight, pMatrix);
 
+    var viewMatrix = scene.camera.viewMatrix();
+    
     for (var i = 0; i < scene.gameObjects.length; i++)
     {
     	var renderer = scene.gameObjects[i].meshRenderer;
@@ -97,7 +99,9 @@ function drawScene() {
 	    );
 	    
 	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
-	    setMatrixUniforms(pMatrix, worldMatrix, renderer.material.shaderProgram);
+	    var mvMatrix = mat4.create();
+	    mat4.multiply(viewMatrix, worldMatrix, mvMatrix);
+	    setMatrixUniforms(pMatrix, mvMatrix, renderer.material.shaderProgram);
 	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 }
@@ -159,6 +163,8 @@ function webGLStart() {
     	obj.meshRenderer = renderer;
     }
 
+    scene.camera.gameObject.position =  vec3.create([0, 0, -2])
+    
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
