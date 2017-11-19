@@ -9,7 +9,6 @@ class GameObject {
 	
 	WorldMatrix(){
 		var world = mat4.create();
-		mat4.identity(world);
 	    
 		mat4.fromRotationTranslationScale(world, this.rotation, this.position, this.scale);
 		

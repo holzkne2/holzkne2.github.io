@@ -15,7 +15,7 @@ class Scene {
 
 class Camera {
 	constructor () {
-		this.fov = 90;
+		this.fov = 45;
 		this.near = 0.1;
 		this.far = 1000;
 		
@@ -32,8 +32,11 @@ class Camera {
 	}
 	
 	update() {
-		if (typeof this.target != "GameObject") {
-			
+		if (typeof this.target == 'undefined') {
+			return;
 		}
+		var rotationMatrix = mat4.create();
+		mat4.targetTo(rotationMatrix, this.gameObject.position, this.target.position, vec3.fromValues(0, 1, 0));
+		mat4.getRotation(this.gameObject.rotation, rotationMatrix);
 	}
 }

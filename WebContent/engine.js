@@ -115,6 +115,10 @@ function animate() {
         
     }
     lastTime = timeNow;
+    
+    
+    
+    scene.camera.update();
 }
 
 function tick() {
@@ -161,7 +165,9 @@ function webGLStart() {
     	obj.meshRenderer = renderer;
     }
 
-    scene.camera.gameObject.position =  vec3.fromValues(0, 0, -2.5)
+    scene.camera.gameObject.position =  vec3.fromValues(5, 2, 0)
+    //quat.fromEuler(scene.camera.gameObject.rotation, 7.662,-19.654,0);
+    scene.camera.target = scene.gameObjects[1];
     
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);
