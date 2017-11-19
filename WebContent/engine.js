@@ -44,9 +44,6 @@ function initTexture() {
 	mainTexture.image.src = "Texture.png";
 }
 
-var pMatrix = mat4.create();
-
-
 function setMatrixUniforms(pMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
@@ -55,11 +52,6 @@ function setMatrixUniforms(pMatrix, mvMatrix, shaderProgram) {
     mat4.toInverseMat3(mvMatrix, normalMatrix);
     mat3.transpose(normalMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
-}
-
-
-function degToRad(degrees) {
-    return degrees * Math.PI / 180;
 }
 
 var currentlyPressedKeys = {};
