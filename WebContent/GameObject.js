@@ -5,18 +5,5 @@ class GameObject {
 		this.scale = vec3.create([1, 1, 1]);
 		
 		this.name = name;
-		
-		this.components = [];
-	}
-	
-	AddComponent(component) {
-		component.gameObject = this;
-		components.push(component);
-	}
-}
-
-class Component {
-	constructor() {
-		this.gameObject = null
 	}
 }

@@ -157,151 +157,6 @@ function handleKeyUp(event) {
 function handleKeys() {
 }
 
-var cubeVertexPositionBuffer;
-var cubeVertexNormalBuffer;
-var cubeVertexTextureCoordBuffer;
-var cubeVertexIndexBuffer;
-
-function initBuffers() {
-    cubeVertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-    vertices = [
-        // Front face
-        -1.0, -1.0,  1.0,
-         1.0, -1.0,  1.0,
-         1.0,  1.0,  1.0,
-        -1.0,  1.0,  1.0,
-
-        // Back face
-        -1.0, -1.0, -1.0,
-        -1.0,  1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0, -1.0, -1.0,
-
-        // Top face
-        -1.0,  1.0, -1.0,
-        -1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0, -1.0,
-
-        // Bottom face
-        -1.0, -1.0, -1.0,
-         1.0, -1.0, -1.0,
-         1.0, -1.0,  1.0,
-        -1.0, -1.0,  1.0,
-
-        // Right face
-         1.0, -1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0,  1.0,  1.0,
-         1.0, -1.0,  1.0,
-
-        // Left face
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0,
-        -1.0,  1.0,  1.0,
-        -1.0,  1.0, -1.0,
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    cubeVertexPositionBuffer.itemSize = 3;
-    cubeVertexPositionBuffer.numItems = 24;
-
-    cubeVertexNormalBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-    var vertexNormals = [
-        // Front face
-         0.0,  0.0,  1.0,
-         0.0,  0.0,  1.0,
-         0.0,  0.0,  1.0,
-         0.0,  0.0,  1.0,
-        // Back face
-         0.0,  0.0, -1.0,
-         0.0,  0.0, -1.0,
-         0.0,  0.0, -1.0,
-         0.0,  0.0, -1.0,
-        // Top face
-         0.0,  1.0,  0.0,
-         0.0,  1.0,  0.0,
-         0.0,  1.0,  0.0,
-         0.0,  1.0,  0.0,
-        // Bottom face
-         0.0, -1.0,  0.0,
-         0.0, -1.0,  0.0,
-         0.0, -1.0,  0.0,
-         0.0, -1.0,  0.0,
-        // Right face
-         1.0,  0.0,  0.0,
-         1.0,  0.0,  0.0,
-         1.0,  0.0,  0.0,
-         1.0,  0.0,  0.0,
-        // Left face
-        -1.0,  0.0,  0.0,
-        -1.0,  0.0,  0.0,
-        -1.0,  0.0,  0.0,
-        -1.0,  0.0,  0.0
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
-    cubeVertexNormalBuffer.itemSize = 3;
-    cubeVertexNormalBuffer.numItems = 24;
-    
-    cubeVertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-    var textureCoords = [
-      // Front face
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-
-      // Back face
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      0.0, 0.0,
-
-      // Top face
-      0.0, 1.0,
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-
-      // Bottom face
-      1.0, 1.0,
-      0.0, 1.0,
-      0.0, 0.0,
-      1.0, 0.0,
-
-      // Right face
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-      0.0, 0.0,
-
-      // Left face
-      0.0, 0.0,
-      1.0, 0.0,
-      1.0, 1.0,
-      0.0, 1.0,
-    ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
-    cubeVertexTextureCoordBuffer.itemSize = 2;
-    cubeVertexTextureCoordBuffer.numItems = 24;
-
-    cubeVertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-    var cubeVertexIndices = [
-        0, 1, 2,      0, 2, 3,    // Front face
-        4, 5, 6,      4, 6, 7,    // Back face
-        8, 9, 10,     8, 10, 11,  // Top face
-        12, 13, 14,   12, 14, 15, // Bottom face
-        16, 17, 18,   16, 18, 19, // Right face
-        20, 21, 22,   20, 22, 23  // Left face
-    ];
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
-    cubeVertexIndexBuffer.itemSize = 1;
-    cubeVertexIndexBuffer.numItems = 36;
-}
-
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -321,14 +176,16 @@ function drawScene() {
 	    
 	    mat4.scale(mvMatrix, scene.gameObjects[i].scale);
 	
-	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-	    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
-	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-	    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    var renderer = scene.gameObjects[i].meshRenderer;
 	    
-	    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-	    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexPositionBuffer);
+	    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, renderer.mesh.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	
+	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexNormalBuffer);
+	    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, renderer.mesh.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    
+	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexTextureCoordBuffer);
+	    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, renderer.mesh.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 	    gl.activeTexture(gl.TEXTURE0);
 	    gl.bindTexture(gl.TEXTURE_2D, mainTexture);
@@ -359,9 +216,9 @@ function drawScene() {
 	        parseFloat(document.getElementById("directionalB").value)
 	    );
 	    
-	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
 	    setMatrixUniforms();
-	    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -388,8 +245,14 @@ function tick() {
 function webGLStart() {
     var canvas = document.getElementById("Game-canvas");
     initGL(canvas);
+    initShaders();
     
     scene = new Scene()
+    
+    var cubeMesh = new Mesh();
+    cubeMesh.cube();
+    cubeMesh.init(gl);
+    
     for (var i = -1; i < 2; i++) {
     	var obj = new GameObject();
     	obj.position = vec3.create([i * 3, 0, -7]);
@@ -397,10 +260,13 @@ function webGLStart() {
     				Math.random(), Math.random(), Math.random()]),
     				obj.rotation);
     	scene.AddGameObject(obj);
+    	
+    	var renderer = new MeshRenderer();
+    	renderer.mesh = cubeMesh;
+    	obj.meshRenderer = renderer;
     }
     
-    initShaders();
-    initBuffers();
+    //initBuffers();
     initTexture();
 
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
