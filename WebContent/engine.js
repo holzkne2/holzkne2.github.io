@@ -18,27 +18,13 @@ function initGL(canvas) {
     }
 }
 
-function setMatrixUniforms(pMatrix, mvMatrix, shaderProgram) {
+function setMatrixUniforms(pMatrix, mMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     
     var normalMatrix = mat3.create();
-    mat3.normalFromMat4(normalMatrix, mvMatrix);
+    mat3.normalFromMat4(normalMatrix, mMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
-}
-
-var currentlyPressedKeys = {};
-
-function handleKeyDown(event) {
-	currentlyPressedKeys[event.keyCode] = true;
-	
-}
-
-function handleKeyUp(event) {
-	currentlyPressedKeys[event.keyCode] = false;
-}
-
-function handleKeys() {
 }
 
 function drawScene() {	
@@ -101,7 +87,7 @@ function drawScene() {
 	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
 	    var mvMatrix = mat4.create();
 	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
-	    setMatrixUniforms(pMatrix, mvMatrix, renderer.material.shaderProgram);
+	    setMatrixUniforms(pMatrix, worldMatrix, mvMatrix, renderer.material.shaderProgram);
 	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 }
@@ -153,7 +139,7 @@ function webGLStart() {
     	obj.meshRenderer = renderer;
     }
 
-    scene.camera.gameObject.position =  vec3.fromValues(5, 2, 0)
+    scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
     //quat.fromEuler(scene.camera.gameObject.rotation, 7.662,-19.654,0);
     scene.camera.target = scene.gameObjects[1];
     
@@ -162,6 +148,10 @@ function webGLStart() {
 
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
+    
+    canvas.onmousedown = handleMouseDown;
+    document.onmouseup = handleMouseUp;
+    document.onmousemove = handleMouseMove;
     
     window.addEventListener('resize', resizeCanvas, false);
     

@@ -20,6 +20,17 @@ class Camera {
 		this.far = 1000;
 		
 		this.target;
+		
+		this.distance = 10;
+		
+		this.xSpeed = 1;
+		this.ySpeed = 10;
+		
+		this.yMinLimit = -20;
+		this.yMaxLimit = 80;
+		
+		this.x = 0;
+		this.y = 0
 	}
 	
 	perspective(aspect, matrix) {
@@ -32,11 +43,21 @@ class Camera {
 	}
 	
 	update() {
-		if (typeof this.target == 'undefined') {
+		if (typeof this.target == 'undefined' || !inputManager.mouseDown) {
 			return;
 		}
-		var rotationMatrix = mat4.create();
-		mat4.targetTo(rotationMatrix, this.gameObject.position, this.target.position, vec3.fromValues(0, 1, 0));
-		mat4.getRotation(this.gameObject.rotation, rotationMatrix);
+		this.x += inputManager.deltaX * this.xSpeed * this.distance * 0.02;
+		this.y += inputManager.deltaY * this.ySpeed * 0.02;
+		
+		var rotation = quat.create();
+		quat.fromEuler(rotation, this.y, this.x, 0);
+		
+		var position = vec3.create();
+		vec3.transformQuat(position, vec3.fromValues(0, 0, this.distance), rotation);
+		vec3.add(position, position, this.target.position);
+		
+		
+		this.gameObject.rotation = rotation;
+		this.gameObject.position = position;
 	}
 }
