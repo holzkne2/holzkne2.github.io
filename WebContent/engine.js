@@ -22,8 +22,7 @@ function setMatrixUniforms(pMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     
     var normalMatrix = mat3.create();
-    mat4.toInverseMat3(mvMatrix, normalMatrix);
-    mat3.transpose(normalMatrix);
+    mat3.normalFromMat4(normalMatrix, mvMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
 
@@ -87,8 +86,8 @@ function drawScene() {
 	    ];
 		
 		var adjustedLD = vec3.create();
-	    vec3.normalize(lightingDirection, adjustedLD);
-	    vec3.scale(adjustedLD, -1);
+	    vec3.normalize(adjustedLD, lightingDirection);
+	    vec3.scale(adjustedLD, adjustedLD, -1);
 	    gl.uniform3fv(renderer.material.shaderProgram.lightingDirectionUniform, adjustedLD);
 	    
 	    gl.uniform3f(
@@ -100,7 +99,7 @@ function drawScene() {
 	    
 	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
 	    var mvMatrix = mat4.create();
-	    mat4.multiply(viewMatrix, worldMatrix, mvMatrix);
+	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
 	    setMatrixUniforms(pMatrix, mvMatrix, renderer.material.shaderProgram);
 	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
@@ -151,10 +150,9 @@ function webGLStart() {
     
     for (var i = -1; i < 2; i++) {
     	var obj = new GameObject();
-    	obj.position = vec3.create([i * 3, 0, -7]);
-    	quat4.normalize(quat4.create([Math.random(),
-    				Math.random(), Math.random(), Math.random()]),
-    				obj.rotation);
+    	obj.position = vec3.fromValues(i * 3, 0, -7);
+    	quat.fromEuler(obj.rotation, Math.random() * 180,
+    				Math.random() * 180, Math.random() * 180);
     	scene.AddGameObject(obj);
     	
     	var renderer = new MeshRenderer();
@@ -163,7 +161,7 @@ function webGLStart() {
     	obj.meshRenderer = renderer;
     }
 
-    scene.camera.gameObject.position =  vec3.create([0, 0, -2])
+    scene.camera.gameObject.position =  vec3.fromValues(0, 0, -2.5)
     
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);
