@@ -4,6 +4,7 @@
 
 var gl;
 var scene;
+var timer;
 
 function initGL(canvas) {
     try {
@@ -105,27 +106,13 @@ function drawScene() {
     }
 }
 
-
-var lastTime = 0;
-
-function animate() {
-    var timeNow = new Date().getTime();
-    if (lastTime != 0) {
-        var elapsed = timeNow - lastTime;
-        
-    }
-    lastTime = timeNow;
-    
-    
-    
-    scene.camera.update();
-}
-
 function tick() {
 	//Could replace with setInterval if making network game due to this not running if tab is not visable
 	requestAnimFrame(tick);
+	timer.update();
 	handleKeys();
-	animate();
+	
+	scene.camera.update();
 	drawScene();
 }
 
@@ -139,7 +126,8 @@ function webGLStart() {
     var canvas = document.getElementById("Game-canvas");
     initGL(canvas);
     
-    scene = new Scene()
+    scene = new Scene();
+    timer = new Timer();
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();
