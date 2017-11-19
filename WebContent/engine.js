@@ -1,5 +1,5 @@
 /**
- * 
+ * Main Engine
  */
 
 var gl;
@@ -17,33 +17,6 @@ function initGL(canvas) {
     }
 }
 
-
-function handleLoadedTexture(texture) {
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    
-    gl.bindTexture(gl.TEXTURE_2D, null);
-}
-
-
-var mainTexture;
-
-function initTexture() {
-	mainTexture = gl.createTexture();
-	mainTexture.image = new Image();
-	
-	mainTexture.image.onload = function () {
-        handleLoadedTexture(mainTexture)
-    }
-
-	mainTexture.image.src = "Texture.png";
-}
-
 function setMatrixUniforms(pMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
@@ -58,12 +31,6 @@ var currentlyPressedKeys = {};
 
 function handleKeyDown(event) {
 	currentlyPressedKeys[event.keyCode] = true;
-	
-	if (String.fromCharCode(event.keyCode) == "F") {
-		filter += 1;
-		if (filter == 3)
-			filter = 0;
-	}
 	
 }
 
@@ -97,7 +64,7 @@ function drawScene() {
 	    gl.vertexAttribPointer(renderer.material.shaderProgram.textureCoordAttribute, renderer.mesh.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 	    gl.activeTexture(gl.TEXTURE0);
-	    gl.bindTexture(gl.TEXTURE_2D, mainTexture);
+	    gl.bindTexture(gl.TEXTURE_2D, renderer.material.albedoTexture.texture);
 	    gl.uniform1i(renderer.material.shaderProgram.samplerUniform, 0);
 	    
 		gl.uniform3f(
@@ -170,6 +137,10 @@ function webGLStart() {
     var standardMat = new StandardMaterial();
     standardMat.init(gl);
     
+    var sandstoneTexture = new Texture();
+    sandstoneTexture.init(gl, "Texture.png");
+    standardMat.albedoTexture = sandstoneTexture;
+    
     for (var i = -1; i < 2; i++) {
     	var obj = new GameObject();
     	obj.position = vec3.create([i * 3, 0, -7]);
@@ -183,9 +154,6 @@ function webGLStart() {
     	renderer.material = standardMat;
     	obj.meshRenderer = renderer;
     }
-    
-    //initBuffers();
-    initTexture();
 
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);

@@ -53,6 +53,8 @@ class Mesh {
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.triangles), gl.STATIC_DRAW);
 		this.vertexIndexBuffer.itemSize = 1;
 		this.vertexIndexBuffer.numItems = this.triangles.length;
+		
+		this.is_init = true;
 	}
 	
 	cube() {
@@ -197,11 +199,50 @@ function getShader(source, id) {
     return shader;
 }
 
+function handleLoadedTexture(gl, texture) {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+class Texture {
+	constructor() {
+		this.is_init = false;
+		
+		this.texture;
+	}
+	
+	init(gl, file) {
+		if (this.is_init) {
+			return;
+		}
+		
+		this.texture = gl.createTexture();
+		this.texture.image = new Image();
+		var temp = this.texture;
+		
+		this.texture.image.onload = function () {
+	        handleLoadedTexture(gl, temp);
+	    }
+
+		this.texture.image.src = file;
+		
+		this.is_init = true;
+	}
+}
+
 class StandardMaterial {
 	constructor() {
 		this.is_init = false;
 		
 		this.shaderProgram;
+		this.albedoTexture;
 	}
 	
 	init(gl) {
@@ -239,5 +280,7 @@ class StandardMaterial {
 	    this.shaderProgram.ambientColorUniform = gl.getUniformLocation(this.shaderProgram, "uAmbientColor");
 	    this.shaderProgram.lightingDirectionUniform = gl.getUniformLocation(this.shaderProgram, "uLightingDirection");
 	    this.shaderProgram.directionalColorUniform = gl.getUniformLocation(this.shaderProgram, "uDirectionalColor");
+	    
+	    this.is_init = true;
 	}
 }
