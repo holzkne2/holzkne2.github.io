@@ -8,8 +8,8 @@ var scene;
 function initGL(canvas) {
     try {
         gl = canvas.getContext("experimental-webgl");
-    gl.viewportWidth = canvas.width;
-    gl.viewportHeight = canvas.height;
+    gl.viewportWidth = canvas.width = window.innerWidth;
+    gl.viewportHeight = canvas.height = window.innerHeight;
     } catch (e) {
     }
     if (!gl) {
@@ -103,26 +103,10 @@ function initTexture() {
 	mainTexture.image.src = "Texture.png";
 }
 
-
-var mvMatrix = mat4.create();
-var mvMatrixStack = [];
 var pMatrix = mat4.create();
 
-function mvPushMatrix() {
-    var copy = mat4.create();
-    mat4.set(mvMatrix, copy);
-    mvMatrixStack.push(copy);
-}
 
-function mvPopMatrix() {
-    if (mvMatrixStack.length == 0) {
-        throw "Invalid popMatrix!";
-    }
-    mvMatrix = mvMatrixStack.pop();
-}
-
-
-function setMatrixUniforms() {
+function setMatrixUniforms(pMatrix, mvMatrix) {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     
@@ -157,24 +141,16 @@ function handleKeyUp(event) {
 function handleKeys() {
 }
 
-function drawScene() {
+function drawScene() {	
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    var pMatrix = mat4.create();
     mat4.perspective(70, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
     for (var i = 0; i < scene.gameObjects.length; i++)
     {
-	    mat4.identity(mvMatrix);
-	    
-	    mat4.translate(mvMatrix, scene.gameObjects[i].position);
-	    
-	    rotationMatrix = mat4.create();
-	    mat4.identity(rotationMatrix)
-	    quat4.toMat4(scene.gameObjects[i].rotation, rotationMatrix);
-	    mat4.multiply(mvMatrix, rotationMatrix);
-	    
-	    mat4.scale(mvMatrix, scene.gameObjects[i].scale);
+	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
 	
 	    var renderer = scene.gameObjects[i].meshRenderer;
 	    
@@ -193,15 +169,15 @@ function drawScene() {
 	    
 		gl.uniform3f(
 				shaderProgram.ambientColorUniform,
-				parseFloat(document.getElementById("ambientR").value),
-	            parseFloat(document.getElementById("ambientG").value),
-	            parseFloat(document.getElementById("ambientB").value)
+				0.2,
+	            0.2,
+	            0.2
 				);
 		
 		var lightingDirection = [
-	        parseFloat(document.getElementById("lightDirectionX").value),
-	        parseFloat(document.getElementById("lightDirectionY").value),
-	        parseFloat(document.getElementById("lightDirectionZ").value)
+	        -0.25,
+	        -0.25,
+	        -1
 	    ];
 		
 		var adjustedLD = vec3.create();
@@ -211,13 +187,13 @@ function drawScene() {
 	    
 	    gl.uniform3f(
 	        shaderProgram.directionalColorUniform,
-	        parseFloat(document.getElementById("directionalR").value),
-	        parseFloat(document.getElementById("directionalG").value),
-	        parseFloat(document.getElementById("directionalB").value)
+	        0.8,
+	        0.8,
+	        0.8
 	    );
 	    
 	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
-	    setMatrixUniforms();
+	    setMatrixUniforms(pMatrix, worldMatrix);
 	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 }
@@ -238,8 +214,14 @@ function tick() {
 	//Could replace with setInterval if making network game due to this not running if tab is not visable
 	requestAnimFrame(tick);
 	handleKeys();
-	drawScene();
 	animate();
+	drawScene();
+}
+
+function resizeCanvas() {
+	var canvas = document.getElementById("Game-canvas");
+	gl.viewportWidth = canvas.width = window.innerWidth;
+    gl.viewportHeight = canvas.height = window.innerHeight;
 }
 
 function webGLStart() {
@@ -274,6 +256,8 @@ function webGLStart() {
 
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
+    
+    window.addEventListener('resize', resizeCanvas, false);
     
     tick();
 }

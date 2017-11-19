@@ -6,4 +6,20 @@ class GameObject {
 		
 		this.name = name;
 	}
+	
+	WorldMatrix(){
+		var world = mat4.create();
+		mat4.identity(world);
+	    
+	    mat4.translate(world, this.position);
+	    
+	    var rotationMatrix = mat4.create();
+	    mat4.identity(rotationMatrix)
+	    quat4.toMat4(this.rotation, rotationMatrix);
+	    mat4.multiply(world, rotationMatrix);
+	    
+	    mat4.scale(world, this.scale);
+	    
+	    return world;
+	}
 }
