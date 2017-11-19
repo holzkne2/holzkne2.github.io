@@ -17,65 +17,6 @@ function initGL(canvas) {
     }
 }
 
-function getShader(source, id) {
-    var shader;
-    if (id == "x-shader/x-fragment") {
-        shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (id == "x-shader/x-vertex") {
-        shader = gl.createShader(gl.VERTEX_SHADER);
-    } else {
-        return null;
-    }
-
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
-
-    return shader;
-}
-
-
-var shaderProgram;
-
-function initShaders() {
-    var fragmentShader = getShader(fragmentShaderSource, "x-shader/x-fragment");
-    var vertexShader = getShader(vertexShaderSource, "x-shader/x-vertex");
-    
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
-
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert("Could not initialise shaders");
-    }
-
-    gl.useProgram(shaderProgram);
-
-    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-
-    shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-    gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-    
-    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
-
-    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
-    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-    shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
-    shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
-    shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
-    shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
-    shaderProgram.alphaUniform = gl.getUniformLocation(shaderProgram, "uAlpha");
-}
-
 
 function handleLoadedTexture(texture) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -106,7 +47,7 @@ function initTexture() {
 var pMatrix = mat4.create();
 
 
-function setMatrixUniforms(pMatrix, mvMatrix) {
+function setMatrixUniforms(pMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     
@@ -155,20 +96,20 @@ function drawScene() {
 	    var renderer = scene.gameObjects[i].meshRenderer;
 	    
 	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexPositionBuffer);
-	    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, renderer.mesh.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    gl.vertexAttribPointer(renderer.material.shaderProgram.vertexPositionAttribute, renderer.mesh.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexNormalBuffer);
-	    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, renderer.mesh.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    gl.vertexAttribPointer(renderer.material.shaderProgram.vertexNormalAttribute, renderer.mesh.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	    
 	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexTextureCoordBuffer);
-	    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, renderer.mesh.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    gl.vertexAttribPointer(renderer.material.shaderProgram.textureCoordAttribute, renderer.mesh.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 	
 	    gl.activeTexture(gl.TEXTURE0);
 	    gl.bindTexture(gl.TEXTURE_2D, mainTexture);
-	    gl.uniform1i(shaderProgram.samplerUniform, 0);
+	    gl.uniform1i(renderer.material.shaderProgram.samplerUniform, 0);
 	    
 		gl.uniform3f(
-				shaderProgram.ambientColorUniform,
+				renderer.material.shaderProgram.ambientColorUniform,
 				0.2,
 	            0.2,
 	            0.2
@@ -183,17 +124,17 @@ function drawScene() {
 		var adjustedLD = vec3.create();
 	    vec3.normalize(lightingDirection, adjustedLD);
 	    vec3.scale(adjustedLD, -1);
-	    gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+	    gl.uniform3fv(renderer.material.shaderProgram.lightingDirectionUniform, adjustedLD);
 	    
 	    gl.uniform3f(
-	        shaderProgram.directionalColorUniform,
+	    		renderer.material.shaderProgram.directionalColorUniform,
 	        0.8,
 	        0.8,
 	        0.8
 	    );
 	    
 	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
-	    setMatrixUniforms(pMatrix, worldMatrix);
+	    setMatrixUniforms(pMatrix, worldMatrix, renderer.material.shaderProgram);
 	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 }
@@ -227,13 +168,15 @@ function resizeCanvas() {
 function webGLStart() {
     var canvas = document.getElementById("Game-canvas");
     initGL(canvas);
-    initShaders();
     
     scene = new Scene()
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();
     cubeMesh.init(gl);
+    
+    var standardMat = new StandardMaterial();
+    standardMat.init(gl);
     
     for (var i = -1; i < 2; i++) {
     	var obj = new GameObject();
@@ -245,6 +188,7 @@ function webGLStart() {
     	
     	var renderer = new MeshRenderer();
     	renderer.mesh = cubeMesh;
+    	renderer.material = standardMat;
     	obj.meshRenderer = renderer;
     }
     

@@ -1,11 +1,12 @@
 class MeshRenderer {
 	constructor() {
-		this.mesh = null;
-		this.material = null;
+		this.mesh;
+		this.material;
 	}
 	
 	init(gl) {
 		mesh.init(gl);
+		material.init(gl);
 	}
 }
 
@@ -175,62 +176,68 @@ class Mesh {
 	}
 }
 
+function getShader(source, id) {
+    var shader;
+    if (id == "x-shader/x-fragment") {
+        shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (id == "x-shader/x-vertex") {
+        shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+        return null;
+    }
+
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(shader));
+        return null;
+    }
+
+    return shader;
+}
+
 class StandardMaterial {
 	constructor() {
-		this.shaderProgram = null;
-	}
-	
-	getShader(source, id) {
-	    var shader;
-	    if (id == "x-shader/x-fragment") {
-	        shader = gl.createShader(gl.FRAGMENT_SHADER);
-	    } else if (id == "x-shader/x-vertex") {
-	        shader = gl.createShader(gl.VERTEX_SHADER);
-	    } else {
-	        return null;
-	    }
-
-	    gl.shaderSource(shader, source);
-	    gl.compileShader(shader);
-
-	    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-	        alert(gl.getShaderInfoLog(shader));
-	        return null;
-	    }
-
-	    return shader;
+		this.is_init = false;
+		
+		this.shaderProgram;
 	}
 	
 	init(gl) {
+		if (this.is_init) {
+			return;
+		}
+		
 		var fragmentShader = getShader(fragmentShaderSource, "x-shader/x-fragment");
 	    var vertexShader = getShader(vertexShaderSource, "x-shader/x-vertex");
 	    
-	    shaderProgram = gl.createProgram();
-	    gl.attachShader(shaderProgram, vertexShader);
-	    gl.attachShader(shaderProgram, fragmentShader);
-	    gl.linkProgram(shaderProgram);
+	    this.shaderProgram = gl.createProgram();
+	    gl.attachShader(this.shaderProgram, vertexShader);
+	    gl.attachShader(this.shaderProgram, fragmentShader);
+	    gl.linkProgram(this.shaderProgram);
 
-	    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+	    if (!gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
 	        alert("Could not initialise shaders");
 	    }
 
-	    gl.useProgram(shaderProgram);
+	    gl.useProgram(this.shaderProgram);
 
-	    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-	    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+	    this.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
+	    gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
 
-	    shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-	    gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+	    this.shaderProgram.vertexNormalAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexNormal");
+	    gl.enableVertexAttribArray(this.shaderProgram.vertexNormalAttribute);
 	    
-	    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-	    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+	    this.shaderProgram.textureCoordAttribute = gl.getAttribLocation(this.shaderProgram, "aTextureCoord");
+	    gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
 
-	    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-	    shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
-	    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-	    shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
-	    shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
-	    shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
+	    this.shaderProgram.pMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uPMatrix");
+	    this.shaderProgram.mvMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uMVMatrix");
+	    this.shaderProgram.nMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uNMatrix");
+	    this.shaderProgram.samplerUniform = gl.getUniformLocation(this.shaderProgram, "uSampler");
+	    this.shaderProgram.ambientColorUniform = gl.getUniformLocation(this.shaderProgram, "uAmbientColor");
+	    this.shaderProgram.lightingDirectionUniform = gl.getUniformLocation(this.shaderProgram, "uLightingDirection");
+	    this.shaderProgram.directionalColorUniform = gl.getUniformLocation(this.shaderProgram, "uDirectionalColor");
 	}
 }
