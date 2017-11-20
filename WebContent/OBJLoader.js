@@ -87,6 +87,7 @@ function OBJLoader(meshFile, mesh) {
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
         	fileLoaded(request.responseText, mesh);
+        	document.getElementById("loadingtext").textContent = "";
         }
     }
     request.send();

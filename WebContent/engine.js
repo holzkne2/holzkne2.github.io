@@ -134,6 +134,5 @@ function webGLStart() {
     
     window.addEventListener('resize', resizeCanvas, false);
     
-    document.getElementById("loadingtext").textContent = "";
     tick();
 }
