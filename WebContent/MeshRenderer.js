@@ -9,6 +9,10 @@ class MeshRenderer {
 			return;
 		}
 		
+		if (!this.model.isInit()) {
+			this.model.init(gl);
+		}
+		
 		for (var i = 0; i < this.model.meshes.length; i++) {
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexPositionBuffer);
 		    gl.vertexAttribPointer(this.material.shaderProgram.vertexPositionAttribute,
@@ -76,6 +80,15 @@ class Model {
 		for (var i = 0; i < this.meshes.length; i++) {
 			this.meshes[i].init(gl);
 		}
+	}
+	
+	isInit() {
+		for (var i = 0; i < this.meshes.length; i++) {
+			if (!this.meshes[i].is_init) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 

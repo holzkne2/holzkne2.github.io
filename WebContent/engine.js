@@ -95,7 +95,7 @@ function webGLStart() {
     	obj.position = vec3.fromValues(i * 3, 0, -7);
     	quat.fromEuler(obj.rotation, Math.random() * 180,
     				Math.random() * 180, Math.random() * 180);
-    	scene.AddGameObject(obj);
+    	//scene.AddGameObject(obj);
     	
     	var renderer = new MeshRenderer();
     	renderer.model = cubeModel;
@@ -105,19 +105,20 @@ function webGLStart() {
 
     scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
     //quat.fromEuler(scene.camera.gameObject.rotation, 7.662,-19.654,0);
-    scene.camera.target = scene.gameObjects[1];
     
     var obj = new GameObject();
     var renderer = new MeshRenderer();
     var shipMesh = new Model();
     shipMesh.load('SpaceShip01.obj');
     shipMesh.init(gl);
-	renderer.mesh = shipMesh;
+	renderer.model = shipMesh;
 	renderer.material = standardMat;
 	obj.meshRenderer = renderer;
 	scene.AddGameObject(obj);
     
-    gl.clearColor(0.5, 0.5, 0.5, 1.0);
+	scene.camera.target = obj;
+    
+	gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
     document.onkeydown = handleKeyDown;
@@ -128,6 +129,8 @@ function webGLStart() {
     document.onmousemove = handleMouseMove;
     
     window.addEventListener('mousewheel', handleMouseWheel, false);
+ // Firefox
+    window.addEventListener("DOMMouseScroll", handleMouseWheel, false);
     
     window.addEventListener('resize', resizeCanvas, false);
     

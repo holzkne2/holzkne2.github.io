@@ -1,10 +1,5 @@
 function fileLoaded(data, model) {
 	
-	// o object_name | g group_name
-	var object_pattern = /^[og]\s*(.+)?/;
-	// usemtl material_name
-	var material_use_pattern = /^usemtl /;
-	
 	var vertices = [];
 	var normals = [];
 	var uvs = [];
@@ -24,17 +19,16 @@ function fileLoaded(data, model) {
 		if (tokens[0] == "v") {
 			vertices.push(parseFloat(tokens[1]))
 			vertices.push(parseFloat(tokens[2]))
-			vertices.push(parseFloat(tokens[3]))
+			vertices.push(0 - parseFloat(tokens[3]))
 		}
 		else if (tokens[0] == "vn") {
 			normals.push(parseFloat(tokens[1]))
 			normals.push(parseFloat(tokens[2]))
-			normals.push(parseFloat(tokens[3]))
+			normals.push(0 - parseFloat(tokens[3]))
 		}
 		else if (tokens[0] == "vt") {
 			uvs.push(parseFloat(tokens[1]))
 			uvs.push(parseFloat(tokens[2]))
-			uvs.push(parseFloat(tokens[3]))
 		}
 		else if (tokens[0] == "usemtl") {
 			currentMaterial = tokens[1];
@@ -51,23 +45,38 @@ function fileLoaded(data, model) {
 		}
 	}
 	
-	var subMesh = new Mesh();
 	for(var m = 0; m < materials.length; m++) {
+		var subMesh = new Mesh();
+		var c = 0;
 		for(var f = 0; f < objects[materials[m]].length; f++) {
-			for(var i = 0; i < 3; i++) {
-				var tokens = objects[materials[m]][i].split('/');
-				
-				subMesh.vertices.push(vertices[parseInt(tokens[0])]);
-				
-				if (tokens[1] != "") {
-					subMesh.uvs.push(uvs[parseInt(tokens[1])]);
-				}
-				
-				if (tokens[2] != "") {
-					subMesh.normals.push(normals[parseInt(tokens[2])]);
-				}
+			var tokens = objects[materials[m]][f].split('/');
+			
+			subMesh.vertices.push(vertices[(parseInt(tokens[0]) - 1) * 3]);
+			subMesh.vertices.push(vertices[(parseInt(tokens[0]) - 1) * 3 + 1]);
+			subMesh.vertices.push(vertices[(parseInt(tokens[0]) - 1) * 3 + 2]);
+			
+			if (tokens[1] != "") {
+				subMesh.uvs.push(uvs[(parseInt(tokens[1]) - 1) * 2]);
+				subMesh.uvs.push(uvs[(parseInt(tokens[1]) - 1) * 2 + 1]);
+			} else {
+				subMesh.uvs.push(0);
+				subMesh.uvs.push(0);
 			}
+			
+			if (tokens[2] != "") {
+				subMesh.normals.push(normals[(parseInt(tokens[2]) - 1) * 3]);
+				subMesh.normals.push(normals[(parseInt(tokens[2]) - 1) * 3 + 1]);
+				subMesh.normals.push(normals[(parseInt(tokens[2]) - 1) * 3 + 2]);
+				
+			} else {
+				subMesh.normals.push(0);
+				subMesh.normals.push(0);
+				subMesh.normals.push(0);
+			}
+			subMesh.triangles.push(c);
+			c += 1;
 		}
+		model.meshes.push(subMesh);
 	}
 }
 
