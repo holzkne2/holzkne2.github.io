@@ -2,9 +2,6 @@
  * Main Engine
  */
 
-response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-response.setHeader("Pragma", "no-cache"); // HTTP 1.0.
-response.setHeader("Expires", "0"); // Proxies.
 
 var gl;
 var scene;
@@ -50,8 +47,9 @@ function drawScene() {
 	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
 	    var mvMatrix = mat4.create();
 	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
-	    setMatrixUniforms(pMatrix, worldMatrix, mvMatrix, renderer.material.shaderProgram);
-	    
+	    for (var m = 0; m < renderer.materials.length; m++) {
+	    setMatrixUniforms(pMatrix, worldMatrix, mvMatrix, renderer.materials[m].shaderProgram);
+	    }	    
 	    renderer.render(gl);
     }
 }
@@ -116,7 +114,7 @@ function webGLStart() {
     shipMesh.load('SpaceShip01.obj');
     shipMesh.init(gl);
 	renderer.model = shipMesh;
-	renderer.material = standardMat;
+	renderer.materials.push(standardMat);
 	obj.meshRenderer = renderer;
 	scene.AddGameObject(obj);
     

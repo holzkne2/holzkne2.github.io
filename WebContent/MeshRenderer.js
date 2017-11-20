@@ -1,11 +1,11 @@
 class MeshRenderer {
 	constructor() {
 		this.model;
-		this.material;
+		this.materials = [];
 	}
 	
 	render(gl) {
-		if (typeof this.model == 'undefined' || typeof this.material == 'undefined') {
+		if (typeof this.model == 'undefined' || typeof this.materials.length == 0) {
 			return;
 		}
 		
@@ -14,24 +14,26 @@ class MeshRenderer {
 		}
 		
 		for (var i = 0; i < this.model.meshes.length; i++) {
+			var matIndex = Math.min(i, this.materials.length - 1);
+			
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexPositionBuffer);
-		    gl.vertexAttribPointer(this.material.shaderProgram.vertexPositionAttribute,
+		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexPositionAttribute,
 		    		this.model.meshes[i].vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		
 		    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexNormalBuffer);
-		    gl.vertexAttribPointer(this.material.shaderProgram.vertexNormalAttribute,
+		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexNormalAttribute,
 		    		this.model.meshes[i].vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		    
 		    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexTextureCoordBuffer);
-		    gl.vertexAttribPointer(this.material.shaderProgram.textureCoordAttribute,
+		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.textureCoordAttribute,
 		    		this.model.meshes[i].vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		
 		    gl.activeTexture(gl.TEXTURE0);
-		    gl.bindTexture(gl.TEXTURE_2D, this.material.albedoTexture.texture);
-		    gl.uniform1i(this.material.shaderProgram.samplerUniform, 0);
+		    gl.bindTexture(gl.TEXTURE_2D, this.materials[matIndex].albedoTexture.texture);
+		    gl.uniform1i(this.materials[matIndex].shaderProgram.samplerUniform, 0);
 		    
 			gl.uniform3f(
-					this.material.shaderProgram.ambientColorUniform,
+					this.materials[matIndex].shaderProgram.ambientColorUniform,
 					0.2,
 		            0.2,
 		            0.2
@@ -46,10 +48,10 @@ class MeshRenderer {
 			var adjustedLD = vec3.create();
 		    vec3.normalize(adjustedLD, lightingDirection);
 		    vec3.scale(adjustedLD, adjustedLD, -1);
-		    gl.uniform3fv(this.material.shaderProgram.lightingDirectionUniform, adjustedLD);
+		    gl.uniform3fv(this.materials[matIndex].shaderProgram.lightingDirectionUniform, adjustedLD);
 		    
 		    gl.uniform3f(
-		    		this.material.shaderProgram.directionalColorUniform,
+		    		this.materials[matIndex].shaderProgram.directionalColorUniform,
 		        0.8,
 		        0.8,
 		        0.8
@@ -63,7 +65,9 @@ class MeshRenderer {
 	
 	init(gl) {
 		model.init(gl);
-		material.init(gl);
+		for (var i = 0; i < materials.length; i++) {
+			material.init(gl);
+		}
 	}
 }
 
