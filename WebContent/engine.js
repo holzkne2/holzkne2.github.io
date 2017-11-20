@@ -90,18 +90,18 @@ function webGLStart() {
     sandstoneTexture.init(gl, "Texture.png");
     standardMat.albedoTexture = sandstoneTexture;
     
-    for (var i = -1; i < 2; i++) {
-    	var obj = new GameObject();
-    	obj.position = vec3.fromValues(i * 3, 0, -7);
-    	quat.fromEuler(obj.rotation, Math.random() * 180,
-    				Math.random() * 180, Math.random() * 180);
-    	//scene.AddGameObject(obj);
-    	
-    	var renderer = new MeshRenderer();
-    	renderer.model = cubeModel;
-    	renderer.material = standardMat;
-    	obj.meshRenderer = renderer;
-    }
+//    for (var i = -1; i < 2; i++) {
+//    	var obj = new GameObject();
+//    	obj.position = vec3.fromValues(i * 3, 0, -7);
+//    	quat.fromEuler(obj.rotation, Math.random() * 180,
+//    				Math.random() * 180, Math.random() * 180);
+//    	//scene.AddGameObject(obj);
+//    	
+//    	var renderer = new MeshRenderer();
+//    	renderer.model = cubeModel;
+//    	renderer.material = standardMat;
+//    	obj.meshRenderer = renderer;
+//    }
 
     scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
     //quat.fromEuler(scene.camera.gameObject.rotation, 7.662,-19.654,0);
