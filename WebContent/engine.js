@@ -44,51 +44,11 @@ function drawScene() {
     	}
     	
 	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
-	
-	    
-	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexPositionBuffer);
-	    gl.vertexAttribPointer(renderer.material.shaderProgram.vertexPositionAttribute, renderer.mesh.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
-	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexNormalBuffer);
-	    gl.vertexAttribPointer(renderer.material.shaderProgram.vertexNormalAttribute, renderer.mesh.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	    
-	    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.mesh.vertexTextureCoordBuffer);
-	    gl.vertexAttribPointer(renderer.material.shaderProgram.textureCoordAttribute, renderer.mesh.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-	
-	    gl.activeTexture(gl.TEXTURE0);
-	    gl.bindTexture(gl.TEXTURE_2D, renderer.material.albedoTexture.texture);
-	    gl.uniform1i(renderer.material.shaderProgram.samplerUniform, 0);
-	    
-		gl.uniform3f(
-				renderer.material.shaderProgram.ambientColorUniform,
-				0.2,
-	            0.2,
-	            0.2
-				);
-		
-		var lightingDirection = [
-	        -0.25,
-	        -0.25,
-	        -1
-	    ];
-		
-		var adjustedLD = vec3.create();
-	    vec3.normalize(adjustedLD, lightingDirection);
-	    vec3.scale(adjustedLD, adjustedLD, -1);
-	    gl.uniform3fv(renderer.material.shaderProgram.lightingDirectionUniform, adjustedLD);
-	    
-	    gl.uniform3f(
-	    		renderer.material.shaderProgram.directionalColorUniform,
-	        0.8,
-	        0.8,
-	        0.8
-	    );
-	    
-	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.mesh.vertexIndexBuffer);
 	    var mvMatrix = mat4.create();
 	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
 	    setMatrixUniforms(pMatrix, worldMatrix, mvMatrix, renderer.material.shaderProgram);
-	    gl.drawElements(gl.TRIANGLES, renderer.mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	    
+	    renderer.render(gl);
     }
 }
 
@@ -119,7 +79,9 @@ function webGLStart() {
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();
-    cubeMesh.init(gl);
+    var cubeModel = new Model();
+    cubeModel.meshes.push(cubeMesh);
+    cubeModel.init(gl);
     
     var standardMat = new StandardMaterial();
     standardMat.init(gl);
@@ -136,7 +98,7 @@ function webGLStart() {
     	scene.AddGameObject(obj);
     	
     	var renderer = new MeshRenderer();
-    	renderer.mesh = cubeMesh;
+    	renderer.model = cubeModel;
     	renderer.material = standardMat;
     	obj.meshRenderer = renderer;
     }
@@ -144,6 +106,16 @@ function webGLStart() {
     scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
     //quat.fromEuler(scene.camera.gameObject.rotation, 7.662,-19.654,0);
     scene.camera.target = scene.gameObjects[1];
+    
+    var obj = new GameObject();
+    var renderer = new MeshRenderer();
+    var shipMesh = new Model();
+    shipMesh.load('SpaceShip01.obj');
+    shipMesh.init(gl);
+	renderer.mesh = shipMesh;
+	renderer.material = standardMat;
+	obj.meshRenderer = renderer;
+	scene.AddGameObject(obj);
     
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);

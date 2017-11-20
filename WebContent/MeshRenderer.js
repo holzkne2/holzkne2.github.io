@@ -1,12 +1,81 @@
 class MeshRenderer {
 	constructor() {
-		this.mesh;
+		this.model;
 		this.material;
 	}
 	
+	render(gl) {
+		if (typeof this.model == 'undefined' || typeof this.material == 'undefined') {
+			return;
+		}
+		
+		for (var i = 0; i < this.model.meshes.length; i++) {
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexPositionBuffer);
+		    gl.vertexAttribPointer(this.material.shaderProgram.vertexPositionAttribute,
+		    		this.model.meshes[i].vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		
+		    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexNormalBuffer);
+		    gl.vertexAttribPointer(this.material.shaderProgram.vertexNormalAttribute,
+		    		this.model.meshes[i].vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		    
+		    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexTextureCoordBuffer);
+		    gl.vertexAttribPointer(this.material.shaderProgram.textureCoordAttribute,
+		    		this.model.meshes[i].vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		
+		    gl.activeTexture(gl.TEXTURE0);
+		    gl.bindTexture(gl.TEXTURE_2D, this.material.albedoTexture.texture);
+		    gl.uniform1i(this.material.shaderProgram.samplerUniform, 0);
+		    
+			gl.uniform3f(
+					this.material.shaderProgram.ambientColorUniform,
+					0.2,
+		            0.2,
+		            0.2
+					);
+			
+			var lightingDirection = [
+		        -0.25,
+		        -0.25,
+		        -1
+		    ];
+			
+			var adjustedLD = vec3.create();
+		    vec3.normalize(adjustedLD, lightingDirection);
+		    vec3.scale(adjustedLD, adjustedLD, -1);
+		    gl.uniform3fv(this.material.shaderProgram.lightingDirectionUniform, adjustedLD);
+		    
+		    gl.uniform3f(
+		    		this.material.shaderProgram.directionalColorUniform,
+		        0.8,
+		        0.8,
+		        0.8
+		    );
+		    
+		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.model.meshes[i].vertexIndexBuffer);
+		    
+		    gl.drawElements(gl.TRIANGLES, this.model.meshes[i].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		}
+	}
+	
 	init(gl) {
-		mesh.init(gl);
+		model.init(gl);
 		material.init(gl);
+	}
+}
+
+class Model {
+	constructor() {
+		this.meshes = [];
+	}
+	
+	load(file) {
+		OBJLoader(file, this);
+	}
+	
+	init(gl) {
+		for (var i = 0; i < this.meshes.length; i++) {
+			this.meshes[i].init(gl);
+		}
 	}
 }
 
@@ -176,6 +245,7 @@ class Mesh {
 	        20, 21, 22,   20, 22, 23  // Left face
 	    ];
 	}
+	
 }
 
 function getShader(source, id) {
