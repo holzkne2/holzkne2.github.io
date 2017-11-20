@@ -58,8 +58,8 @@ class Camera {
 
 		if (inputManager.mouseDown)
 		{
-			this.x += inputManager.deltaX * this.xSpeed * this.distance * 0.02;
-			this.y += inputManager.deltaY * this.ySpeed * 0.02;
+			this.x -= inputManager.deltaX * this.xSpeed * this.distance * 0.02;
+			this.y -= inputManager.deltaY * this.ySpeed * 0.02;
 		}
 		
 		
