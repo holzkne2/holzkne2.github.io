@@ -9,23 +9,13 @@ function handleMouseUp(event) {
 }
 
 function handleMouseMove(event) {
-	if (!inputManager.mouseDown) {
-		return;
-	}
 	
 	var newX = event.clientX;
 	var newY = event.clientY;
 	
 	inputManager.deltaX = newX - inputManager.lastMouseX;
-	var around = vec3.create();
-//	vec3.copy(around, scene.camera.target.position);
-//	around[1] = scene.camera.gameObject.position[1];
-//	vec3.rotateY(scene.camera.gameObject.position, scene.camera.gameObject.position,
-//			around, deltaX / 100);
-	
+	var around = vec3.create();	
 	inputManager.deltaY = newY - inputManager.lastMouseY;
-//	vec3.rotateX(scene.camera.gameObject.position, scene.camera.gameObject.position,
-//			scene.camera.target.position, deltaY / 100);
 	
 	inputManager.lastMouseX = newX;
 	inputManager.lastMouseY = newY;
@@ -43,6 +33,10 @@ function handleKeyUp(event) {
 function handleKeys() {
 }
 
+function handleMouseWheel(event) {
+	inputManager.deltaWheel = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+}
+
 class InputManager {
 	constructor() {
 		this.currentlyPressedKeys = {};
@@ -51,6 +45,13 @@ class InputManager {
 		this.lastMouseY = null;
 		this.deltaX = 0;
 		this.deltaY = 0;
+		this.deltaWheel = 0;
+	}
+	
+	clear() {
+		this.deltaX = 0;
+		this.deltaY = 0;
+		this.deltaWheel = 0;
 	}
 }
 	

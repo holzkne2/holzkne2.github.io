@@ -13,6 +13,10 @@ class Scene {
 	}
 }
 
+function clamp(num, min, max) {
+	  return Math.min(Math.max(num, min), max);
+	};
+
 class Camera {
 	constructor () {
 		this.fov = 45;
@@ -29,6 +33,9 @@ class Camera {
 		this.yMinLimit = -20;
 		this.yMaxLimit = 80;
 		
+		this.distanceMin = 5;
+		this.distanceMax = 50;
+		
 		this.x = 0;
 		this.y = 0
 	}
@@ -43,11 +50,18 @@ class Camera {
 	}
 	
 	update() {
-		if (typeof this.target == 'undefined' || !inputManager.mouseDown) {
+		if (typeof this.target == 'undefined') {
 			return;
 		}
-		this.x += inputManager.deltaX * this.xSpeed * this.distance * 0.02;
-		this.y += inputManager.deltaY * this.ySpeed * 0.02;
+		
+		this.distance = clamp(this.distance - inputManager.deltaWheel * 0.5, this.distanceMin, this.distanceMax);
+
+		if (inputManager.mouseDown)
+		{
+			this.x += inputManager.deltaX * this.xSpeed * this.distance * 0.02;
+			this.y += inputManager.deltaY * this.ySpeed * 0.02;
+		}
+		
 		
 		var rotation = quat.create();
 		quat.fromEuler(rotation, this.y, this.x, 0);

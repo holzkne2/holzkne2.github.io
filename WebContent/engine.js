@@ -100,6 +100,8 @@ function tick() {
 	
 	scene.camera.update();
 	drawScene();
+	
+	inputManager.clear();
 }
 
 function resizeCanvas() {
@@ -152,6 +154,8 @@ function webGLStart() {
     canvas.onmousedown = handleMouseDown;
     document.onmouseup = handleMouseUp;
     document.onmousemove = handleMouseMove;
+    
+    window.addEventListener('mousewheel', handleMouseWheel, false);
     
     window.addEventListener('resize', resizeCanvas, false);
     
