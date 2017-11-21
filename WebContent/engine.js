@@ -46,11 +46,8 @@ function drawScene() {
     	
 	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
 	    var mvMatrix = mat4.create();
-	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
-	    for (var m = 0; m < renderer.materials.length; m++) {
-	    setMatrixUniforms(pMatrix, worldMatrix, mvMatrix, renderer.materials[m].shaderProgram);
-	    }	    
-	    renderer.render(gl);
+	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);   
+	    renderer.render(gl, pMatrix, worldMatrix, mvMatrix);
     }
 }
 
@@ -85,39 +82,58 @@ function webGLStart() {
     cubeModel.meshes.push(cubeMesh);
     cubeModel.init(gl);
     
-    var standardMat = new StandardMaterial();
-    standardMat.init(gl);
+    var LightColor = new StandardMaterial();
+    LightColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    LightColor.color = [0.62, 0.63, 0.55];
     
-    var sandstoneTexture = new Texture();
-    sandstoneTexture.init(gl, "Texture.png");
-    standardMat.albedoTexture = sandstoneTexture;
+    var DarkColor = new StandardMaterial();
+    DarkColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    DarkColor.color = [0.24, 0.26, 0.23];
     
-//    for (var i = -1; i < 2; i++) {
-//    	var obj = new GameObject();
-//    	obj.position = vec3.fromValues(i * 3, 0, -7);
-//    	quat.fromEuler(obj.rotation, Math.random() * 180,
-//    				Math.random() * 180, Math.random() * 180);
-//    	//scene.AddGameObject(obj);
-//    	
-//    	var renderer = new MeshRenderer();
-//    	renderer.model = cubeModel;
-//    	renderer.material = standardMat;
-//    	obj.meshRenderer = renderer;
-//    }
-
-    scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
-    //quat.fromEuler(scene.camera.gameObject.rotation, 7.662,-19.654,0);
+    var HullLights = new StandardMaterial();
+    HullLights.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    HullLights.color = [0.72, 0.73, 0.65];
+    
+    var EngineExhast = new StandardMaterial();
+    EngineExhast.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
+    EngineExhast.color = [0.58, 0.8, 0.97];
+    
+    var GoldBall = new StandardMaterial();
+    GoldBall.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    GoldBall.color = [1, 0.84, 0];
+    
+    var RingLight = new StandardMaterial();
+    RingLight.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
+    RingLight.color = [01, 1, 1];
+    
+    var Missing = new StandardMaterial();
+    Missing.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    Missing.color = [1, 0, 1];
+    
+//    var sandstoneTexture = new Texture();
+//    sandstoneTexture.init(gl, "Texture.png");
+//    standardMat.texture0 = sandstoneTexture;
     
     var obj = new GameObject();
     var renderer = new MeshRenderer();
     var shipMesh = new Model();
+    
     shipMesh.load('SpaceShip01.obj');
     shipMesh.init(gl);
 	renderer.model = shipMesh;
-	renderer.materials.push(standardMat);
+	
+	renderer.materials.push(DarkColor); // dark
+	renderer.materials.push(LightColor); // hull
+	renderer.materials.push(HullLights); // hull_lights
+	renderer.materials.push(EngineExhast); // engine
+	renderer.materials.push(GoldBall); // ball
+	renderer.materials.push(RingLight); // ring_light
+	renderer.materials.push(Missing);
+	
 	obj.meshRenderer = renderer;
 	scene.AddGameObject(obj);
     
+	scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
 	scene.camera.target = obj;
     
 	gl.clearColor(0.5, 0.5, 0.5, 1.0);

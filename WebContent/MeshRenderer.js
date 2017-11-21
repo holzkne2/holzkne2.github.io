@@ -4,7 +4,7 @@ class MeshRenderer {
 		this.materials = [];
 	}
 	
-	render(gl) {
+	render(gl, pMatrix, mMatrix, mvMatrix) {
 		if (typeof this.model == 'undefined' || typeof this.materials.length == 0) {
 			return;
 		}
@@ -15,24 +15,32 @@ class MeshRenderer {
 		
 		for (var i = 0; i < this.model.meshes.length; i++) {
 			var matIndex = Math.min(i, this.materials.length - 1);
+			gl.useProgram(this.materials[matIndex].shaderProgram);
 			
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexPositionBuffer);
 		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexPositionAttribute,
 		    		this.model.meshes[i].vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		
-		    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexNormalBuffer);
-		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexNormalAttribute,
-		    		this.model.meshes[i].vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		    if (this.materials[matIndex].shaderProgram.vertexNormalAttribute != -1) {
+			    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexNormalBuffer);
+			    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexNormalAttribute,
+			    		this.model.meshes[i].vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		    }
 		    
-		    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexTextureCoordBuffer);
-		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.textureCoordAttribute,
-		    		this.model.meshes[i].vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	    	if (this.materials[matIndex].shaderProgram.textureCoordAttribute != -1) {
+			    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexTextureCoordBuffer);
+			    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.textureCoordAttribute,
+			    		this.model.meshes[i].vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		    }
 		
-		    gl.activeTexture(gl.TEXTURE0);
-		    gl.bindTexture(gl.TEXTURE_2D, this.materials[matIndex].albedoTexture.texture);
-		    gl.uniform1i(this.materials[matIndex].shaderProgram.samplerUniform, 0);
+		    if (typeof this.materials[matIndex].texture0 != 'undefined' &&
+		    		this.materials[matIndex].texture0.texture.image.complete) {
+			    gl.activeTexture(gl.TEXTURE0);
+			    gl.bindTexture(gl.TEXTURE_2D, this.materials[matIndex].texture0.texture);
+			    gl.uniform1i(this.materials[matIndex].shaderProgram.samplerUniform, 0);
+			}
 		    
-			gl.uniform3f(
+		   gl.uniform3f(
 					this.materials[matIndex].shaderProgram.ambientColorUniform,
 					0.2,
 		            0.2,
@@ -52,12 +60,27 @@ class MeshRenderer {
 		    
 		    gl.uniform3f(
 		    		this.materials[matIndex].shaderProgram.directionalColorUniform,
-		        0.8,
-		        0.8,
-		        0.8
+		        1,
+		        1,
+		        0.9
 		    );
 		    
+		    if (this.materials[matIndex].shaderProgram.color != null) {
+		    	gl.uniform3f(this.materials[matIndex].shaderProgram.color,
+		    			this.materials[matIndex].color[0],
+		    			this.materials[matIndex].color[1],
+		    			this.materials[matIndex].color[2]);
+		    }
+		    
 		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.model.meshes[i].vertexIndexBuffer);
+		    
+		    
+		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.pMatrixUniform, false, pMatrix);
+		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.mvMatrixUniform, false, mvMatrix);
+		    
+		    var normalMatrix = mat3.create();
+		    mat3.normalFromMat4(normalMatrix, mMatrix);
+		    gl.uniformMatrix3fv(this.materials[matIndex].shaderProgram.nMatrixUniform, false, normalMatrix);
 		    
 		    gl.drawElements(gl.TRIANGLES, this.model.meshes[i].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		}
@@ -329,16 +352,15 @@ class StandardMaterial {
 		this.is_init = false;
 		
 		this.shaderProgram;
-		this.albedoTexture;
 	}
 	
-	init(gl) {
+	init(gl, fSource, vSource) {
 		if (this.is_init) {
 			return;
 		}
 		
-		var fragmentShader = getShader(fragmentShaderSource, "x-shader/x-fragment");
-	    var vertexShader = getShader(vertexShaderSource, "x-shader/x-vertex");
+		var fragmentShader = getShader(fSource, "x-shader/x-fragment");
+	    var vertexShader = getShader(vSource, "x-shader/x-vertex");
 	    
 	    this.shaderProgram = gl.createProgram();
 	    gl.attachShader(this.shaderProgram, vertexShader);
@@ -355,11 +377,17 @@ class StandardMaterial {
 	    gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
 
 	    this.shaderProgram.vertexNormalAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexNormal");
-	    gl.enableVertexAttribArray(this.shaderProgram.vertexNormalAttribute);
+	    if (this.shaderProgram.vertexNormalAttribute != -1) {
+	    	gl.enableVertexAttribArray(this.shaderProgram.vertexNormalAttribute);
+	    }
 	    
 	    this.shaderProgram.textureCoordAttribute = gl.getAttribLocation(this.shaderProgram, "aTextureCoord");
-	    gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
+	    if (this.shaderProgram.textureCoordAttribute != -1) {
+	    	gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
+	    }
 
+	    this.shaderProgram.color = gl.getUniformLocation(this.shaderProgram, "uColor");
+	    
 	    this.shaderProgram.pMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uPMatrix");
 	    this.shaderProgram.mvMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uMVMatrix");
 	    this.shaderProgram.nMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uNMatrix");
@@ -369,5 +397,9 @@ class StandardMaterial {
 	    this.shaderProgram.directionalColorUniform = gl.getUniformLocation(this.shaderProgram, "uDirectionalColor");
 	    
 	    this.is_init = true;
+	}
+
+	render(gl) {
+		
 	}
 }
