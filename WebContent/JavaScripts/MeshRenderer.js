@@ -4,7 +4,7 @@ class MeshRenderer {
 		this.materials = [];
 	}
 	
-	render(gl, pMatrix, mMatrix, mvMatrix) {
+	render(gl, pMatrix, mMatrix, mvMatrix, camera) {
 		if (typeof this.model == 'undefined' || typeof this.materials.length == 0) {
 			return;
 		}
@@ -72,6 +72,23 @@ class MeshRenderer {
 		    			this.materials[matIndex].color[2]);
 		    }
 		    
+		    if (this.materials[matIndex].shaderProgram.metallic != null) {
+		    	gl.uniform1f(this.materials[matIndex].shaderProgram.metallic,
+		    			this.materials[matIndex].metallic);
+		    }
+		    
+		    if (this.materials[matIndex].shaderProgram.smoothness != null) {
+		    	gl.uniform1f(this.materials[matIndex].shaderProgram.smoothness,
+		    			this.materials[matIndex].smoothness);
+		    }
+		    
+		    if(this.materials[matIndex].shaderProgram.worldSpaceCameraPos != null) {
+		    	gl.uniform3f(this.materials[matIndex].shaderProgram.worldSpaceCameraPos,
+		    			camera.gameObject.position[0],
+		    			camera.gameObject.position[1],
+		    			camera.gameObject.position[2]);
+		    }
+		    
 		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.model.meshes[i].vertexIndexBuffer);
 		    
 		    
@@ -81,6 +98,8 @@ class MeshRenderer {
 		    var normalMatrix = mat3.create();
 		    mat3.normalFromMat4(normalMatrix, mMatrix);
 		    gl.uniformMatrix3fv(this.materials[matIndex].shaderProgram.nMatrixUniform, false, normalMatrix);
+		    
+		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.objectToWorld, false, mMatrix);
 		    
 		    gl.drawElements(gl.TRIANGLES, this.model.meshes[i].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		}
@@ -387,11 +406,18 @@ class StandardMaterial {
 	    }
 
 	    this.shaderProgram.color = gl.getUniformLocation(this.shaderProgram, "uColor");
+	    this.shaderProgram.metallic = gl.getUniformLocation(this.shaderProgram, "uMetallic");
+	    this.shaderProgram.smoothness = gl.getUniformLocation(this.shaderProgram, "uSmoothness");
 	    
 	    this.shaderProgram.pMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uPMatrix");
 	    this.shaderProgram.mvMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uMVMatrix");
 	    this.shaderProgram.nMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uNMatrix");
+	    this.shaderProgram.objectToWorld = gl.getUniformLocation(this.shaderProgram, "uObjectToWorld")
+	    
+	    this.shaderProgram.worldSpaceCameraPos = gl.getUniformLocation(this.shaderProgram, "uWorldSpaceCameraPos");
+	    
 	    this.shaderProgram.samplerUniform = gl.getUniformLocation(this.shaderProgram, "uSampler");
+	    
 	    this.shaderProgram.ambientColorUniform = gl.getUniformLocation(this.shaderProgram, "uAmbientColor");
 	    this.shaderProgram.lightingDirectionUniform = gl.getUniformLocation(this.shaderProgram, "uLightingDirection");
 	    this.shaderProgram.directionalColorUniform = gl.getUniformLocation(this.shaderProgram, "uDirectionalColor");

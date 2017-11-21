@@ -9,7 +9,7 @@ var timer;
 
 function initGL(canvas) {
     try {
-        gl = canvas.getContext("experimental-webgl");
+        gl = canvas.getContext("webgl2");
     gl.viewportWidth = canvas.width = window.innerWidth;
     gl.viewportHeight = canvas.height = window.innerHeight;
     } catch (e) {
@@ -47,7 +47,7 @@ function drawScene() {
 	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
 	    var mvMatrix = mat4.create();
 	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);   
-	    renderer.render(gl, pMatrix, worldMatrix, mvMatrix);
+	    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera);
     }
 }
 
@@ -85,14 +85,20 @@ function webGLStart() {
     var LightColor = new StandardMaterial();
     LightColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     LightColor.color = [0.62, 0.63, 0.55];
+    LightColor.metallic = 0.7;
+    LightColor.smoothness = 10.0;
     
     var DarkColor = new StandardMaterial();
     DarkColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     DarkColor.color = [0.24, 0.26, 0.23];
+    DarkColor.metallic = 0.7;
+    DarkColor.smoothness = 10.0;
     
     var HullLights = new StandardMaterial();
     HullLights.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     HullLights.color = [0.72, 0.73, 0.65];
+    HullLights.metallic = 0.7;
+    HullLights.smoothness = 10.0;
     
     var EngineExhast = new StandardMaterial();
     EngineExhast.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
@@ -101,6 +107,8 @@ function webGLStart() {
     var GoldBall = new StandardMaterial();
     GoldBall.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     GoldBall.color = [1, 0.84, 0];
+    GoldBall.metallic = 0.5;
+    GoldBall.smoothness = 5.0;
     
     var RingLight = new StandardMaterial();
     RingLight.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
