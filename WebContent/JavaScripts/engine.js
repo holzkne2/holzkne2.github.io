@@ -118,7 +118,7 @@ function webGLStart() {
     var renderer = new MeshRenderer();
     var shipMesh = new Model();
     
-    shipMesh.load('SpaceShip01.obj');
+    shipMesh.load('Assets/Models/SpaceShip01.obj');
     shipMesh.init(gl);
 	renderer.model = shipMesh;
 	
