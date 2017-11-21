@@ -6,6 +6,9 @@
 var gl;
 var scene;
 var timer;
+var mainRenderTarget;
+var screenQuad;
+var sandstoneTexture;
 
 function initGL(canvas) {
     try {
@@ -28,27 +31,69 @@ function setMatrixUniforms(pMatrix, mMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
 
-function drawScene() {	
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    var pMatrix = mat4.create();
-    scene.camera.perspective(gl.viewportWidth / gl.viewportHeight, pMatrix);
-
-    var viewMatrix = scene.camera.viewMatrix();
-    
-    for (var i = 0; i < scene.gameObjects.length; i++)
-    {
-    	var renderer = scene.gameObjects[i].meshRenderer;
-    	if (typeof renderer == 'undefined') {
-    		continue;
-    	}
-    	
-	    var worldMatrix = scene.gameObjects[i].WorldMatrix();
+function drawScene() {
+//	mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+	{
+		gl.bindFramebuffer(gl.FRAMEBUFFER, mainRenderTarget.fb);
+	    gl.viewport(0, 0, mainRenderTarget.textureWidth, mainRenderTarget.textureHeight);
+	    gl.clearColor(0, 0, 0, 1.0);
+	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+	    var pMatrix = mat4.create();
+	    scene.camera.perspective(mainRenderTarget.textureWidth / mainRenderTarget.textureHeight, pMatrix);
+	
+	    var viewMatrix = scene.camera.viewMatrix();
+	    
+	    for (var i = 0; i < scene.gameObjects.length; i++)
+	    {
+	    	var renderer = scene.gameObjects[i].meshRenderer;
+	    	if (typeof renderer == 'undefined') {
+	    		continue;
+	    	}
+	    	
+		    var worldMatrix = scene.gameObjects[i].WorldMatrix();
+		    var mvMatrix = mat4.create();
+		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);   
+		    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera);
+	    }
+	}
+	
+	{
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	    gl.clearColor(0.5, 0.5, 0.5, 1.0);
+	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+	    var pMatrix = mat4.create();
+	    mat4.ortho(pMatrix, 0, 1, 0, 1, 0, 100);
+		
+	    var viewMatrix = mat4.create();
+	    var worldMatrix = mat4.create();
 	    var mvMatrix = mat4.create();
-	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);   
-	    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera);
-    }
+	    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+	    
+	    gl.useProgram(screenMat.shaderProgram);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
+	    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
+	    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
+	    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
+	    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	    gl.activeTexture(gl.TEXTURE0);
+	    gl.bindTexture(gl.TEXTURE_2D, mainRenderTarget.texture);
+	    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
+	    
+	    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
+	    
+	    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
+	    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
+	    
+	    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+	}
 }
 
 function tick() {
@@ -67,6 +112,8 @@ function resizeCanvas() {
 	var canvas = document.getElementById("Game-canvas");
 	gl.viewportWidth = canvas.width = window.innerWidth;
     gl.viewportHeight = canvas.height = window.innerHeight;
+    
+    mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 }
 
 function webGLStart() {
@@ -76,11 +123,20 @@ function webGLStart() {
     scene = new Scene();
     timer = new Timer();
     
-    var cubeMesh = new Mesh();
-    cubeMesh.cube();
-    var cubeModel = new Model();
-    cubeModel.meshes.push(cubeMesh);
-    cubeModel.init(gl);
+    screenQuad = new Mesh();
+    screenQuad.screen();
+    screenQuad.init(gl);
+    
+    screenMat = new StandardMaterial();
+    screenMat.init(gl, passthroughPostFragment, simplePostVertex);
+    
+    mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+    
+//    var cubeMesh = new Mesh();
+//    cubeMesh.cube();
+//    var cubeModel = new Model();
+//    cubeModel.meshes.push(cubeMesh);
+//    cubeModel.init(gl);
     
     var LightColor = new StandardMaterial();
     LightColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
@@ -118,8 +174,8 @@ function webGLStart() {
     Missing.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     Missing.color = [1, 0, 1];
     
-//    var sandstoneTexture = new Texture();
-//    sandstoneTexture.init(gl, "Texture.png");
+    sandstoneTexture = new Texture();
+    sandstoneTexture.init(gl, "Assets/Textures/glass.gif");
 //    standardMat.texture0 = sandstoneTexture;
     
     var obj = new GameObject();
