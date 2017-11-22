@@ -108,8 +108,12 @@ var fragmentColorShaderSource =`
 
     void main(void) {
     	//shadow
+//    	float cosLight = max(dot(-uLightingDirection, vNormal), 0.0);
+//    	float slopeScale = 1.0 - cosLight;
+//    	float normalOffset = 0.0005 * slopeScale;
+    	
     	vec3 fragmentDepth = vShadowPos.xyz;
-    	float shadowAcneRemover = 0.007;
+    	float shadowAcneRemover = 0.0002;
     	fragmentDepth.z -= shadowAcneRemover;
     	
     	float texelSize = 1.0 / 2048.0;
@@ -125,8 +129,12 @@ var fragmentColorShaderSource =`
 			}
 		}
 		amountInLight /= 9.0;
-			
-		
+//		
+//		float texelDepth = decodeFloat(texture2D(uDepthColorTexture,
+//			fragmentDepth.xy));
+//		if (fragmentDepth.z < texelDepth) {
+//			amountInLight = 1.0;
+//		}
     
         vec3 viewDir = normalize(uWorldSpaceCameraPos - vWorldPos);
         vec3 halfDir = normalize(uLightingDirection + viewDir);

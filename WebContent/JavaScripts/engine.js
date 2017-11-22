@@ -34,19 +34,19 @@ function setMatrixUniforms(pMatrix, mMatrix, mvMatrix, shaderProgram) {
 
 function drawScene() {
 	
-	var lightingDirection = [
-        0,
-        0,
-        -1
-    ];
+	var lightingDirection = vec3.create();
+	
 	var lightRotation = quat.create();
-	quat.fromEuler(lightRotation, 0,0,180);
+	quat.fromEuler(lightRotation, 22, 43,180);
+	
+	vec3.transformQuat(lightingDirection, vec3.fromValues(0, 0, -1), lightRotation);
 	
 	var pLightMatrix = mat4.create();
-	mat4.ortho(pLightMatrix, -40, 40, -40, 40, -40.0, 80);
+	mat4.ortho(pLightMatrix, -20, 20, -20, 20, -20.0, 40);
 	
 	var lightViewMatrix = mat4.create();
 	mat4.fromRotationTranslation(lightViewMatrix, lightRotation, scene.camera.gameObject.position);
+	mat4.invert(lightViewMatrix, lightViewMatrix);
 	
 	// Draw Shadows
 	{
@@ -176,7 +176,7 @@ function webGLStart() {
     
     mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-    shadowMap = new DepthTexture(gl, 2048, 2048);
+    shadowMap = new DepthTexture(gl, 4096, 4096);
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();
