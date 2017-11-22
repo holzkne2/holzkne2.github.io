@@ -116,7 +116,7 @@ var fragmentColorShaderSource =`
     	float shadowAcneRemover = 0.0002;
     	fragmentDepth.z -= shadowAcneRemover;
     	
-    	float texelSize = 1.0 / 2048.0;
+    	float texelSize = 1.0 / 4096.0;
     	float amountInLight = 0.0;
     	
 		for(int x = -1; x <= 1; x++) {
