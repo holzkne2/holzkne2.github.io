@@ -42,7 +42,7 @@ function drawScene() {
 	vec3.transformQuat(lightingDirection, vec3.fromValues(0, 0, -1), lightRotation);
 	
 	var pLightMatrix = mat4.create();
-	mat4.ortho(pLightMatrix, -20, 20, -20, 20, -20.0, 40);
+	mat4.ortho(pLightMatrix, -10, 10, -10, 10, -10.0, 20);
 	
 	var lightViewMatrix = mat4.create();
 	mat4.fromRotationTranslation(lightViewMatrix, lightRotation, scene.camera.gameObject.position);
@@ -176,7 +176,7 @@ function webGLStart() {
     
     mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-    shadowMap = new DepthTexture(gl, 4096, 4096);
+    shadowMap = new DepthTexture(gl, 2048, 2048);
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();
@@ -260,6 +260,7 @@ function webGLStart() {
     
 	gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);
+    
 
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;

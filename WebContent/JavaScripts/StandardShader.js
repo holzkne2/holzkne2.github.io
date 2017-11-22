@@ -108,15 +108,13 @@ var fragmentColorShaderSource =`
 
     void main(void) {
     	//shadow
-//    	float cosLight = max(dot(-uLightingDirection, vNormal), 0.0);
-//    	float slopeScale = 1.0 - cosLight;
-//    	float normalOffset = 0.0005 * slopeScale;
+    	float cosLight = max(dot(uLightingDirection, vNormal), 0.0);
     	
     	vec3 fragmentDepth = vShadowPos.xyz;
-    	float shadowAcneRemover = 0.0002;
+    	float shadowAcneRemover = 0.0005 * tan(acos(cosLight));
     	fragmentDepth.z -= shadowAcneRemover;
     	
-    	float texelSize = 1.0 / 4096.0;
+    	float texelSize = 1.0 / 2048.0;
     	float amountInLight = 0.0;
     	
 		for(int x = -1; x <= 1; x++) {
