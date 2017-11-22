@@ -20,6 +20,6 @@ var passthroughPostFragment = `
 	uniform sampler2D uSampler;
 	
 	void main(void) {
-		gl_FragColor = texture2D(uSampler, vTextureCoord);
+		gl_FragColor = vec4(texture2D(uSampler, vTextureCoord).rgb, 1.0);
 	}
 	`;

@@ -7,6 +7,7 @@ var gl;
 var scene;
 var timer;
 var mainRenderTarget;
+var shadowMap;
 var screenQuad;
 var sandstoneTexture;
 
@@ -32,11 +33,48 @@ function setMatrixUniforms(pMatrix, mMatrix, mvMatrix, shaderProgram) {
 }
 
 function drawScene() {
-//	mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+	
+	var lightingDirection = [
+        0,
+        0,
+        -1
+    ];
+	var lightRotation = quat.create();
+	quat.fromEuler(lightRotation, 0,0,180);
+	
+	var pLightMatrix = mat4.create();
+	mat4.ortho(pLightMatrix, -40, 40, -40, 40, -40.0, 80);
+	
+	var lightViewMatrix = mat4.create();
+	mat4.fromRotationTranslation(lightViewMatrix, lightRotation, scene.camera.gameObject.position);
+	
+	// Draw Shadows
+	{
+		gl.bindFramebuffer(gl.FRAMEBUFFER, shadowMap.fb);
+		gl.viewport(0, 0, shadowMap.textureWidth, shadowMap.textureHeight);
+	    gl.clearColor(0, 0, 0, 1.0);
+	    gl.clearDepth(1.0)
+	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	    
+	    for (var i = 0; i < scene.gameObjects.length; i++)
+	    {
+	    	var renderer = scene.gameObjects[i].meshRenderer;
+	    	if (typeof renderer == 'undefined') {
+	    		continue;
+	    	}
+	    	
+	    	var mvMatrix = mat4.create();
+	    	mat4.multiply(mvMatrix, lightViewMatrix, scene.gameObjects[i].WorldMatrix())
+	    	
+		    renderer.renderShadow(gl, mvMatrix, pLightMatrix);
+	    }
+	}
+	
+	// Draw Objects
 	{
 		gl.bindFramebuffer(gl.FRAMEBUFFER, mainRenderTarget.fb);
 	    gl.viewport(0, 0, mainRenderTarget.textureWidth, mainRenderTarget.textureHeight);
-	    gl.clearColor(0, 0, 0, 1.0);
+	    gl.clearColor(0.1, 0.1, 0.1, 1.0);
 	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
 	    var pMatrix = mat4.create();
@@ -53,11 +91,17 @@ function drawScene() {
 	    	
 		    var worldMatrix = scene.gameObjects[i].WorldMatrix();
 		    var mvMatrix = mat4.create();
-		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);   
-		    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera);
+		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+		    
+		    var mvLightMatrix = mat4.create();
+	    	mat4.multiply(mvLightMatrix, lightViewMatrix, scene.gameObjects[i].WorldMatrix())
+		    
+		    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera, lightingDirection, shadowMap,
+		    		mvLightMatrix, pLightMatrix);
 	    }
 	}
 	
+	//Draw Post Processing
 	{
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -132,11 +176,25 @@ function webGLStart() {
     
     mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-//    var cubeMesh = new Mesh();
-//    cubeMesh.cube();
-//    var cubeModel = new Model();
-//    cubeModel.meshes.push(cubeMesh);
-//    cubeModel.init(gl);
+    shadowMap = new DepthTexture(gl, 2048, 2048);
+    
+    var cubeMesh = new Mesh();
+    cubeMesh.cube();
+    var cubeModel = new Model();
+    cubeModel.meshes.push(cubeMesh);
+    cubeModel.init(gl);
+    var Cubeobj = new GameObject();
+    var Cuberenderer = new MeshRenderer();
+    Cuberenderer.model = cubeModel;
+    Cuberenderer.materials.push(new StandardMaterial());
+    Cuberenderer.materials[0].color = [0.62, 0.63, 0.55];
+    Cuberenderer.materials[0].metallic = 0.7;
+    Cuberenderer.materials[0].smoothness = 10.0;
+    Cuberenderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    Cubeobj.position = vec3.fromValues(0, 0, -2);
+    Cubeobj.meshRenderer = Cuberenderer;
+    scene.AddGameObject(Cubeobj);
+    
     
     var LightColor = new StandardMaterial();
     LightColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
