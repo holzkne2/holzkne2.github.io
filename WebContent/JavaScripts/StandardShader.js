@@ -133,10 +133,11 @@ var fragmentColorShaderSource =`#version 300 es
 
     void main(void) {
     	//shadow
-    	float cosLight = max(dot(uLightingDirection, vNormal), 0.0);
+    	float cosLight = min(max(dot(uLightingDirection, vNormal), 0.0), 1.0);
     	
     	vec3 fragmentDepth = vShadowPos.xyz;
-    	float shadowAcneRemover = 0.0001 * tan(acos(cosLight));
+    	float shadowAcneRemover = 0.0003 * tan(acos(cosLight));
+    	shadowAcneRemover = min(max(shadowAcneRemover, 0.0), 0.015);
     	fragmentDepth.z -= shadowAcneRemover;
     	
     	float texelSize = 1.0 / 2048.0;
@@ -164,7 +165,7 @@ var fragmentColorShaderSource =`#version 300 es
 			float texelDepth = decodeFloat(texture(uDepthColorTexture,
 				fragmentDepth.xy + poissonDisk[index]/1400.0));
 			if (fragmentDepth.z < texelDepth) {
-				amountInLight += 0.2;
+				amountInLight += 0.25;
 			}
 		}
     

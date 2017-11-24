@@ -176,7 +176,7 @@ function webGLStart() {
     
     mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-    shadowMap = new DepthTexture(gl, 4096, 4096);
+    shadowMap = new DepthTexture(gl, 2048, 2048);
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();
