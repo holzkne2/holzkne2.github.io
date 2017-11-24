@@ -542,6 +542,7 @@ class StandardMaterial {
 
 	    if (!gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
 	        alert("Could not initialise shaders");
+	        return;
 	    }
 
 	    gl.useProgram(this.shaderProgram);
