@@ -150,9 +150,9 @@ var fragmentColorShaderSource =`#version 300 es
 	float CalcShadowFactor(int CascadeIndex, vec4 LightSpacePos) {
 		vec3 fragmentDepth = LightSpacePos.xyz;
 		
-		float cosLight = min(max(dot(uLightingDirection, vNormal), 0.0), 1.0);
+		float cosLight = min(max(dot(uLightingDirection, normalize(vNormal)), 0.0), 1.0);
 		
-		float shadowAcneRemover = 0.07 * tan(acos(cosLight));
+		float shadowAcneRemover = 0.005 * tan(acos(cosLight));
     	shadowAcneRemover = min(max(shadowAcneRemover, 0.0), 0.015);
     	fragmentDepth.z -= shadowAcneRemover;
     	
@@ -161,7 +161,7 @@ var fragmentColorShaderSource =`#version 300 es
 		for (int i = 0; i < 4; i++){
 			int index = int(16.0 * random(vec4(fragmentDepth.xyy, i))) % 16;
 			float texelDepth = decodeFloat(texture(uShadowMap[CascadeIndex],
-				fragmentDepth.xy + poissonDisk[index]/2800.0));
+				fragmentDepth.xy + poissonDisk[index]/1400.0));
 			if (fragmentDepth.z < texelDepth) {
 				amountInLight += 0.25;
 			}
@@ -176,6 +176,8 @@ var fragmentColorShaderSource =`#version 300 es
 	}
 
     void main(void) {
+    	vec3 normal = normalize(vNormal);
+    
     	//shadow    
     	float amountInLight = 0.0;
 		for (int i = 0; i < NUM_CASCADES ; i++){
@@ -183,6 +185,10 @@ var fragmentColorShaderSource =`#version 300 es
 				amountInLight = CalcShadowFactor(i, vLightSpacePos[i]);
 				break;
 			}
+		}
+		
+		if (vClipSpacePosZ > uCascadeEndClipSpace[NUM_CASCADES - 1]) {
+			amountInLight = 1.0;
 		}
     
         vec3 viewDir = normalize(uWorldSpaceCameraPos - vWorldPos);
@@ -193,8 +199,8 @@ var fragmentColorShaderSource =`#version 300 es
         float oneMinusReflectivity = 1.0 - uMetallic;
         albedo = albedo * oneMinusReflectivity;
         
-        float light = max(dot(vNormal, uLightingDirection), 0.0);
-		vec3 specular = specTint * uDirectionalColor * pow(dot(halfDir, vNormal), uSmoothness);
+        float light = max(dot(normal, uLightingDirection), 0.0);
+		vec3 specular = specTint * uDirectionalColor * pow(dot(halfDir, normal), uSmoothness);
        	
        	vec3 diffuse = albedo * uDirectionalColor * light;
        	vec3 col = diffuse + specular;

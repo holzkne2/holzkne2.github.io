@@ -180,7 +180,7 @@ function computeShadowProjection(view, projection, lightView) {
 	
 	var splitFar = [zFar, zFar, zFar, zFar];
 	var splitNear = [zNear, zNear, zNear, zNear];
-	var lambda = 0.8;
+	var lambda = 0.5;
 	var j = 1;
 	for (var i = 0; i < 2; i++, j += 1)
 	{
@@ -396,7 +396,8 @@ function webGLStart() {
     Cuberenderer.materials[0].metallic = 0.7;
     Cuberenderer.materials[0].smoothness = 10.0;
     Cuberenderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
-    Cubeobj.position = vec3.fromValues(0, 0, -2);
+    Cubeobj.position = vec3.fromValues(0, 0, -4);
+    Cubeobj.scale = vec3.fromValues(2,2,2);
     Cubeobj.meshRenderer = Cuberenderer;
     scene.AddGameObject(Cubeobj);
     
