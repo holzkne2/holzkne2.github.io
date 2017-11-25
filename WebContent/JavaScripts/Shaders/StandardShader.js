@@ -208,19 +208,22 @@ var fragmentColorShaderSource =`#version 300 es
         
         fragmentColor = vec4(col + (uAmbientColor * albedo), 1);
         
+//        fragmentColor.g = amountInLight;
 //        amountInLight = 0.0;
-//        fragmentColor.rgb = vec3(0.0,0.0,0.0);
+//        //fragmentColor.rgb = vec3(0.0,0.0,0.0);
 //        for (int i = 0; i < NUM_CASCADES ; i++){
 //			if (vClipSpacePosZ <= uCascadeEndClipSpace[i]) {
 //				break;
 //			}
 //			amountInLight += 0.25;
 //		}
-		
-//		fragmentColor.r = CalcShadowFactor(0, vLightSpacePos[0]);
-//		fragmentColor.g = decodeFloat(texture(uShadowMap[1], vLightSpacePos[1].xy));
-//		fragmentColor.b = decodeFloat(texture(uShadowMap[2], vLightSpacePos[2].xy));
-//        fragmentColor = vec4(amountInLight, amountInLight, amountInLight, 1);
+//		
+//		fragmentColor.r = amountInLight;
+//		
+////		fragmentColor.r = CalcShadowFactor(0, vLightSpacePos[0]);
+////		fragmentColor.g = CalcShadowFactor(2, vLightSpacePos[1]);
+////		fragmentColor.b = CalcShadowFactor(2, vLightSpacePos[2]);
+//        //fragmentColor = vec4(amountInLight, amountInLight, amountInLight, 1);
     }`
 	;
 

@@ -37,6 +37,7 @@ function toRadians(deg) {
 	return deg * Math.PI / 180;
 }
 
+// obsolete
 function calcOthoProjs(lightR) {
 	// Get Camera Rotation
 	var camInv = mat4.create();
@@ -174,7 +175,7 @@ function computeBox(viewProjection, lightView)
 
 function computeShadowProjection(view, projection, lightView) {	
 	var zNear = scene.camera.near;
-	var zFar = 100;
+	var zFar = 200;
 	var fov = toRadians(scene.camera.fov);
 	var ratio = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
 	
@@ -198,8 +199,6 @@ function computeShadowProjection(view, projection, lightView) {
 		mat4.multiply(cameraViewProjection, cameraViewProjection, view);
 	
 		var box = computeBox(cameraViewProjection, lightView);
-		var org = mat4.create();
-		mat4.ortho(org, -10, 10, -10, 10, -10.0, 20);
 		mat4.ortho(shadowMaps[i].pMatrix, box.bottomLeft[0], box.topRight[0],
 				box.bottomLeft[1], box.topRight[1],
 				-box.topRight[2], -box.bottomLeft[2]);
