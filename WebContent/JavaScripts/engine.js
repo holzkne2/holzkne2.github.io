@@ -2,12 +2,11 @@
  * Main Engine
  */
 
-
 var gl;
 var scene;
 var timer;
 var mainRenderTarget;
-var shadowMap;
+var shadowMaps = [];
 var screenQuad;
 var sandstoneTexture;
 
@@ -32,26 +31,216 @@ function setMatrixUniforms(pMatrix, mMatrix, mvMatrix, shaderProgram) {
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
 
+cascadeEnd = [4];
+
+function toRadians(deg) {
+	return deg * Math.PI / 180;
+}
+
+function calcOthoProjs(lightR) {
+	// Get Camera Rotation
+	var camInv = mat4.create();
+	mat4.fromQuat(camInv, scene.camera.gameObject.rotation);
+	mat4.invert(camInv, camInv);
+	
+	// Get Light Rotation
+	var lightM = mat4.create();
+	mat4.fromQuat(lightM, lightR);
+	
+	var LightCamMatrix = mat4.create();
+	mat4.multiply(LightCamMatrix, lightM, camInv);
+	
+	// Aspect Ration
+	var ar = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
+	// Horizonal
+	var tanHalfHFOV = Math.tan(toRadians(scene.camera.fov / 2.0));
+	// Vertical
+	var tanHalfVFOV = Math.tan(toRadians((scene.camera.fov * ar) / 2.0));
+	
+	for(var i = 0; i < 3; i++) {
+		var xn = cascadeEnd[i] * tanHalfHFOV;
+		var xf = cascadeEnd[i + 1] * tanHalfHFOV;
+		var yn = cascadeEnd[i] * tanHalfVFOV;
+		var yf = cascadeEnd[i + 1] * tanHalfVFOV;
+		
+		var frustumCorners = [
+			// near
+			xn, yn, cascadeEnd[i], 1,
+			-xn, yn, cascadeEnd[i], 1,
+			xn, -yn, cascadeEnd[i], 1,
+			-xn, -yn, cascadeEnd[i], 1,
+			
+			// far
+			xf, yf, cascadeEnd[i + 1], 1,
+			-xf, yf, cascadeEnd[i + 1], 1,
+			xf, -yf, cascadeEnd[i + 1], 1,
+			-xf, -yf, cascadeEnd[i + 1], 1				
+		];
+		
+		var frustumCornersL = [8 * 4];
+		
+		var minX = 1000000;
+		var maxX = -1000000;
+		var minY = 1000000;
+		var maxY = -1000000;
+		var minZ = 1000000;
+		var maxZ = -100000;
+		
+		for(var j = 0; j < 8; j++) {
+			var vW = vec4.fromValues(frustumCorners[j*4],
+					frustumCorners[j*4 + 1],
+					frustumCorners[j*4 + 2],
+					frustumCorners[j*4 + 3]);
+			
+			var fcL = vec4.create();
+			vec4.transformMat4(fcL, vW, LightCamMatrix);
+			
+			frustumCornersL[j * 4] = fcL[0];
+			frustumCornersL[j * 4 + 1] = fcL[1];
+			frustumCornersL[j * 4 + 2] = fcL[2];
+			frustumCornersL[j * 4 + 3] = fcL[3];
+			
+			minX = Math.min(minX, frustumCornersL[j * 4]);
+			maxX = Math.max(maxX, frustumCornersL[j * 4]);
+			minY = Math.min(minY, frustumCornersL[j * 4 + 1]);
+			maxY = Math.max(maxY, frustumCornersL[j * 4 + 1]);
+			minZ = Math.min(minZ, frustumCornersL[j * 4 + 2]);
+			maxZ = Math.max(maxZ, frustumCornersL[j * 4 + 2]);
+		}
+		
+		mat4.ortho(shadowMaps[i].pMatrix, minX, maxX, minY, maxY, minZ, maxZ);  
+		if (i == 0) {
+//			console.log(minX, maxX, minY, maxY, minZ, maxZ);
+			console.log(frustumCorners);
+		}
+	}	
+}
+
+// Lerp
+function mix(x, y, a) {
+	return x * (1.0 - a) + y * (a);
+}
+
+class Box {
+	constructor() {
+		this.bottomLeft;
+		this.topRight;
+	}
+}
+
+function computeBox(viewProjection, lightView)
+{
+	var t = mat4.create();
+	mat4.invert(t, viewProjection);
+	mat4.multiply(t, lightView, t);
+	var v = [
+		vec4.fromValues(-1, 1, -1, 1),
+		vec4.fromValues(1, 1, -1, 1),
+		vec4.fromValues(1, -1, -1, 1),
+		vec4.fromValues(-1, -1, -1, 1),
+		vec4.fromValues(-1, 1, 1, 1),
+		vec4.fromValues(1, 1, 1, 1),
+		vec4.fromValues(1, -1, 1, 1),
+		vec4.fromValues(1, -1, 1, 1)
+	];
+	vec4.transformMat4(v[0], v[0], t);
+	vec4.transformMat4(v[1], v[1], t);
+	vec4.transformMat4(v[2], v[2], t);
+	vec4.transformMat4(v[3], v[3], t);
+	vec4.transformMat4(v[4], v[4], t);
+	vec4.transformMat4(v[5], v[5], t);
+	vec4.transformMat4(v[6], v[6], t);
+	vec4.transformMat4(v[7], v[7], t);
+	
+	for (var i = 0; i < 8; i++) {
+		vec4.scale(v[i], v[i], 1.0 / v[i][3]);
+	}
+	
+	var out = new Box();
+	out.bottomLeft = vec3.fromValues(1000000, 1000000, 1000000);
+	out.topRight = vec3.fromValues(-1000000, -1000000, -1000000);
+	
+	for (var i = 0; i < 8; i++) {
+		out.bottomLeft[0] = Math.min(v[i][0], out.bottomLeft[0]);
+		out.topRight[0] = Math.max(v[i][0], out.topRight[0]);
+		out.bottomLeft[1] = Math.min(v[i][1], out.bottomLeft[1]);
+		out.topRight[1] = Math.max(v[i][1], out.topRight[1]);
+		out.bottomLeft[2] = Math.min(v[i][2], out.bottomLeft[2]);
+		out.topRight[2] = Math.max(v[i][2], out.topRight[2]);
+	}
+	
+	return out;
+}
+
+function computeShadowProjection(view, projection, lightView) {	
+	var zNear = scene.camera.near;
+	var zFar = 100;
+	var fov = toRadians(scene.camera.fov);
+	var ratio = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
+	
+	var splitFar = [zFar, zFar, zFar, zFar];
+	var splitNear = [zNear, zNear, zNear, zNear];
+	var lambda = 0.8;
+	var j = 1;
+	for (var i = 0; i < 2; i++, j += 1)
+	{
+		splitFar[i] = mix(
+			zNear + (j / 3) * (zFar - zNear),
+			zNear + Math.pow(zFar / zNear, j / 3),
+			lambda
+		);
+		splitNear[i + 1] = splitFar[i];
+	}
+	
+	for (var i = 0; i < 3; i++) {
+		var cameraViewProjection = mat4.create();
+		mat4.perspective(cameraViewProjection, fov, ratio, zNear, splitFar[i])
+		mat4.multiply(cameraViewProjection, cameraViewProjection, view);
+	
+		var box = computeBox(cameraViewProjection, lightView);
+		var org = mat4.create();
+		mat4.ortho(org, -10, 10, -10, 10, -10.0, 20);
+		mat4.ortho(shadowMaps[i].pMatrix, box.bottomLeft[0], box.topRight[0],
+				box.bottomLeft[1], box.topRight[1],
+				-box.topRight[2], -box.bottomLeft[2]);
+	}
+	
+	zNear = splitFar[i];
+	
+	for (i = 3; i < 4; i++) {
+		splitFar[i] = 1000000;
+		splitNear[i] = -1000000;
+	}
+	
+	cascadeEnd = splitFar;
+}
+
 function drawScene() {
 	
 	var lightingDirection = vec3.create();
 	
 	var lightRotation = quat.create();
-	quat.fromEuler(lightRotation, 22, 43,180);
+	quat.fromEuler(lightRotation, 22, 44,180);
 	
-	vec3.transformQuat(lightingDirection, vec3.fromValues(0, 0, -1), lightRotation);
+	vec3.transformQuat(lightingDirection, vec3.fromValues(0, 0, -1), lightRotation);	
 	
-	var pLightMatrix = mat4.create();
-	mat4.ortho(pLightMatrix, -10, 10, -10, 10, -10.0, 20);
+	var pMatrix = mat4.create();
+    scene.camera.perspective(mainRenderTarget.textureWidth / mainRenderTarget.textureHeight, pMatrix);
+    
+    var viewMatrix = scene.camera.viewMatrix();
 	
-	var lightViewMatrix = mat4.create();
+    var lightViewMatrix = mat4.create();
 	mat4.fromRotationTranslation(lightViewMatrix, lightRotation, scene.camera.gameObject.position);
 	mat4.invert(lightViewMatrix, lightViewMatrix);
+    
+    computeShadowProjection(viewMatrix, pMatrix, lightViewMatrix);
+//	calcOthoProjs(lightRotation);
 	
 	// Draw Shadows
+	for (var s = 0; s < 3; s++)
 	{
-		gl.bindFramebuffer(gl.FRAMEBUFFER, shadowMap.fb);
-		gl.viewport(0, 0, shadowMap.textureWidth, shadowMap.textureHeight);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, shadowMaps[s].fb);
+		gl.viewport(0, 0, shadowMaps[s].textureWidth, shadowMaps[s].textureHeight);
 	    gl.clearColor(0, 0, 0, 1.0);
 	    gl.clearDepth(1.0)
 	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -63,10 +252,10 @@ function drawScene() {
 	    		continue;
 	    	}
 	    	
-	    	var mvMatrix = mat4.create();
-	    	mat4.multiply(mvMatrix, lightViewMatrix, scene.gameObjects[i].WorldMatrix())
+	    	var mvLightMatrix = mat4.create();
+	    	mat4.multiply(mvLightMatrix, lightViewMatrix, scene.gameObjects[i].WorldMatrix())
 	    	
-		    renderer.renderShadow(gl, mvMatrix, pLightMatrix);
+		    renderer.renderShadow(gl, mvLightMatrix, shadowMaps[s].pMatrix);
 	    }
 	}
 	
@@ -77,10 +266,6 @@ function drawScene() {
 	    gl.clearColor(0.1, 0.1, 0.1, 1.0);
 	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
-	    var pMatrix = mat4.create();
-	    scene.camera.perspective(mainRenderTarget.textureWidth / mainRenderTarget.textureHeight, pMatrix);
-	
-	    var viewMatrix = scene.camera.viewMatrix();
 	    
 	    for (var i = 0; i < scene.gameObjects.length; i++)
 	    {
@@ -95,9 +280,15 @@ function drawScene() {
 		    
 		    var mvLightMatrix = mat4.create();
 	    	mat4.multiply(mvLightMatrix, lightViewMatrix, scene.gameObjects[i].WorldMatrix())
+	    	
+	    	var mvpLights = [3];
+	    	for (var p = 0; p < 3; p++) {
+		    	mvpLights[p] = mat4.create();
+				mat4.multiply(mvpLights[p], shadowMaps[p].pMatrix, mvLightMatrix);
+	    	}
 		    
-		    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera, lightingDirection, shadowMap,
-		    		mvLightMatrix, pLightMatrix);
+		    renderer.render(gl, pMatrix, worldMatrix, mvMatrix, scene.camera, lightingDirection,
+		    		shadowMaps, mvpLights, cascadeEnd);
 	    }
 	}
 	
@@ -136,7 +327,6 @@ function drawScene() {
 	    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
 	    
 	    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-
 	}
 }
 
@@ -176,7 +366,22 @@ function webGLStart() {
     
     mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-    shadowMap = new DepthTexture(gl, 2048, 2048);
+    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
+    shadowMaps[0].pMatrix = mat4.create();
+    mat4.ortho(shadowMaps[0].pMatrix, -10, 10, -10, 10, -10.0, 20);
+    
+    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
+    shadowMaps[1].pMatrix = mat4.create();
+    mat4.ortho(shadowMaps[1].pMatrix, -200, 200, -200, 200, -200, 500);
+   
+    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
+    shadowMaps[2].pMatrix = mat4.create();
+    mat4.ortho(shadowMaps[2].pMatrix, -80, 80, -80, 80, 80.0, 260);    
+    
+    
+    cascadeEnd = [4];
+    
+    
     
     var cubeMesh = new Mesh();
     cubeMesh.cube();

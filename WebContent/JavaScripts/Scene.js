@@ -19,7 +19,7 @@ function clamp(num, min, max) {
 
 class Camera {
 	constructor () {
-		this.fov = 45;
+		this.fov = 90;
 		this.near = 0.1;
 		this.far = 1000;
 		
@@ -34,14 +34,14 @@ class Camera {
 		this.yMaxLimit = 80;
 		
 		this.distanceMin = 3;
-		this.distanceMax = 15;
+		this.distanceMax = 100;
 		
 		this.x = 0;
 		this.y = 0
 	}
 	
 	perspective(aspect, matrix) {
-		mat4.perspective(matrix, this.fov, aspect, this.near, this.far);
+		mat4.perspective(matrix, toRadians(this.fov), aspect, this.near, this.far);
 	}
 	
 	viewMatrix() {

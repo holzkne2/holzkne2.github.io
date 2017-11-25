@@ -30,8 +30,7 @@ class MeshRenderer {
 		}
 	}
 	
-	render(gl, pMatrix, mMatrix, mvMatrix, camera, lightingDirection, depthTexture,
-			lightMatrix, pLightMatrix) {
+	render(gl, pMatrix, mMatrix, mvMatrix, camera, lightingDirection, shadowMaps, mvpLights, cascadeEnd) {
 		if (typeof this.model == 'undefined' || typeof this.materials.length == 0) {
 			return;
 		}
@@ -44,26 +43,40 @@ class MeshRenderer {
 			var matIndex = Math.min(i, this.materials.length - 1);
 			gl.useProgram(this.materials[matIndex].shaderProgram);
 			
+			// Vertex
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexPositionBuffer);
 		    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexPositionAttribute,
 		    		this.model.meshes[i].vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		
+		    // Normals
 		    if (this.materials[matIndex].shaderProgram.vertexNormalAttribute != -1) {
 			    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexNormalBuffer);
 			    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.vertexNormalAttribute,
 			    		this.model.meshes[i].vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		    }
 		    
+		    // UVs
 	    	if (this.materials[matIndex].shaderProgram.textureCoordAttribute != -1) {
 			    gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[i].vertexTextureCoordBuffer);
 			    gl.vertexAttribPointer(this.materials[matIndex].shaderProgram.textureCoordAttribute,
 			    		this.model.meshes[i].vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		    }
-		
+	    	
+	    	// Shadow Maps
 		    gl.activeTexture(gl.TEXTURE0);
-		    gl.bindTexture(gl.TEXTURE_2D, depthTexture.texture);
-		    gl.uniform1i(this.materials[matIndex].shaderProgram.samplerUniform, 0);
+		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[0].texture);
+		    //gl.uniform1i(this.materials[matIndex].shaderProgram.shadowMap[0], 0);
 		    
+		    gl.activeTexture(gl.TEXTURE1);
+		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[1].texture);
+		    //gl.uniform1i(this.materials[matIndex].shaderProgram.shadowMap[1], 0);
+		    
+		    gl.activeTexture(gl.TEXTURE2);
+		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[2].texture);
+		    //gl.uniform1i(this.materials[matIndex].shaderProgram.shadowMap[2], 0);
+		    gl.uniform1iv(this.materials[matIndex].shaderProgram.shadowMaps, [0, 1, 2]);
+		    
+		    // Ambient Color
 		   gl.uniform3f(
 					this.materials[matIndex].shaderProgram.ambientColorUniform,
 					0.2,
@@ -71,12 +84,7 @@ class MeshRenderer {
 		            0.2
 					);
 			
-//			var lightingDirection = [
-//		        -0.25,
-//		        -0.25,
-//		        -1
-//		    ];
-			
+		   // Light Color and Direction
 			var adjustedLD = vec3.create();
 		    vec3.normalize(adjustedLD, lightingDirection);
 		    vec3.scale(adjustedLD, adjustedLD, -1);
@@ -89,6 +97,7 @@ class MeshRenderer {
 		        0.9
 		    );
 		    
+		    // Color
 		    if (this.materials[matIndex].shaderProgram.color != null) {
 		    	gl.uniform3f(this.materials[matIndex].shaderProgram.color,
 		    			this.materials[matIndex].color[0],
@@ -96,16 +105,19 @@ class MeshRenderer {
 		    			this.materials[matIndex].color[2]);
 		    }
 		    
+		    // Metallic
 		    if (this.materials[matIndex].shaderProgram.metallic != null) {
 		    	gl.uniform1f(this.materials[matIndex].shaderProgram.metallic,
 		    			this.materials[matIndex].metallic);
 		    }
 		    
+		    // Smoothness
 		    if (this.materials[matIndex].shaderProgram.smoothness != null) {
 		    	gl.uniform1f(this.materials[matIndex].shaderProgram.smoothness,
 		    			this.materials[matIndex].smoothness);
 		    }
 		    
+		    // Camera World Space
 		    if(this.materials[matIndex].shaderProgram.worldSpaceCameraPos != null) {
 		    	gl.uniform3f(this.materials[matIndex].shaderProgram.worldSpaceCameraPos,
 		    			camera.gameObject.position[0],
@@ -113,21 +125,32 @@ class MeshRenderer {
 		    			camera.gameObject.position[2]);
 		    }
 		    
+		    // Triangles
 		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.model.meshes[i].vertexIndexBuffer);
 		    
-		    
+		    // Matrices
 		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.pMatrixUniform, false, pMatrix);
 		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.mvMatrixUniform, false, mvMatrix);
 		    
+		    // Normal Matrix
 		    var normalMatrix = mat3.create();
 		    mat3.normalFromMat4(normalMatrix, mMatrix);
 		    gl.uniformMatrix3fv(this.materials[matIndex].shaderProgram.nMatrixUniform, false, normalMatrix);
 		    
+		    // Object to World Matrix
 		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.objectToWorld, false, mMatrix);
 		    
-		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.lightMViewMatrix, false, lightMatrix);
-		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.lightProjectionMatrix, false, pLightMatrix);
+		    // Light Matrix
+		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.lightMVP[0], false, mvpLights[0]);
+		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.lightMVP[1], false, mvpLights[1]);
+		    gl.uniformMatrix4fv(this.materials[matIndex].shaderProgram.lightMVP[2], false, mvpLights[2]);
 		    
+		    // Cascade End Clip Space
+		    gl.uniform1f(this.materials[matIndex].shaderProgram.cascadeEndClipSpace[0], cascadeEnd[0]);
+		    gl.uniform1f(this.materials[matIndex].shaderProgram.cascadeEndClipSpace[1], cascadeEnd[1]);
+		    gl.uniform1f(this.materials[matIndex].shaderProgram.cascadeEndClipSpace[2], cascadeEnd[2]);
+		    
+		    // Draw
 		    gl.drawElements(gl.TRIANGLES, this.model.meshes[i].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		}
 	}
@@ -570,15 +593,27 @@ class StandardMaterial {
 	    this.shaderProgram.objectToWorld = gl.getUniformLocation(this.shaderProgram, "uObjectToWorld")
 	    
 	    this.shaderProgram.worldSpaceCameraPos = gl.getUniformLocation(this.shaderProgram, "uWorldSpaceCameraPos");
+
+	    this.shaderProgram.shadowMaps;
+	    this.shaderProgram.shadowMaps = gl.getUniformLocation(this.shaderProgram, "uShadowMap");
+//	    this.shaderProgram.shadowMap = [3];
+//	    this.shaderProgram.shadowMap[0] = gl.getUniformLocation(this.shaderProgram, "uShadowMap[0]");
+//	    this.shaderProgram.shadowMap[1] = gl.getUniformLocation(this.shaderProgram, "uShadowMap[1]");
+//	    this.shaderProgram.shadowMap[2] = gl.getUniformLocation(this.shaderProgram, "uShadowMap[2]");
 	    
-	    this.shaderProgram.samplerUniform = gl.getUniformLocation(this.shaderProgram, "uDepthColorTexture");
+	    this.shaderProgram.cascadeEndClipSpace = [3];
+	    this.shaderProgram.cascadeEndClipSpace[0] = gl.getUniformLocation(this.shaderProgram, "uCascadeEndClipSpace[0]");
+	    this.shaderProgram.cascadeEndClipSpace[1] = gl.getUniformLocation(this.shaderProgram, "uCascadeEndClipSpace[1]");
+	    this.shaderProgram.cascadeEndClipSpace[2] = gl.getUniformLocation(this.shaderProgram, "uCascadeEndClipSpace[2]");
 	    
 	    this.shaderProgram.ambientColorUniform = gl.getUniformLocation(this.shaderProgram, "uAmbientColor");
 	    this.shaderProgram.lightingDirectionUniform = gl.getUniformLocation(this.shaderProgram, "uLightingDirection");
 	    this.shaderProgram.directionalColorUniform = gl.getUniformLocation(this.shaderProgram, "uDirectionalColor");
 	    
-	    this.shaderProgram.lightMViewMatrix = gl.getUniformLocation(this.shaderProgram, "uLightMViewMatrix");
-	    this.shaderProgram.lightProjectionMatrix = gl.getUniformLocation(this.shaderProgram, "uLightProjectionMatrix");
+	    this.shaderProgram.lightMVP = [3];
+	    this.shaderProgram.lightMVP[0] = gl.getUniformLocation(this.shaderProgram, "uMVPlight[0]");
+	    this.shaderProgram.lightMVP[1] = gl.getUniformLocation(this.shaderProgram, "uMVPlight[1]");
+	    this.shaderProgram.lightMVP[2] = gl.getUniformLocation(this.shaderProgram, "uMVPlight[2]");
 	    
 	    this.initShadow(gl);
 	    
