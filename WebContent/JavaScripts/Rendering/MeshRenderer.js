@@ -63,18 +63,18 @@ class MeshRenderer {
 		    }
 	    	
 	    	// Shadow Maps
-		    gl.activeTexture(gl.TEXTURE0);
-		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[0].texture);
-		    //gl.uniform1i(this.materials[matIndex].shaderProgram.shadowMap[0], 0);
-		    
-		    gl.activeTexture(gl.TEXTURE1);
-		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[1].texture);
-		    //gl.uniform1i(this.materials[matIndex].shaderProgram.shadowMap[1], 0);
-		    
-		    gl.activeTexture(gl.TEXTURE2);
-		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[2].texture);
-		    //gl.uniform1i(this.materials[matIndex].shaderProgram.shadowMap[2], 0);
-		    gl.uniform1iv(this.materials[matIndex].shaderProgram.shadowMaps, [0, 1, 2]);
+	    	var textureLocation = gl.TEXTURE0;
+	    	if (this.materials[matIndex].shaderProgram.shadowMaps != null) {
+			    gl.activeTexture(textureLocation++);
+			    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[0].texture);
+			    
+			    gl.activeTexture(textureLocation++);
+			    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[1].texture);
+			    
+			    gl.activeTexture(textureLocation++);
+			    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[2].texture);
+			    gl.uniform1iv(this.materials[matIndex].shaderProgram.shadowMaps, [0, 1, 2]);
+	    	}
 		    
 		    // Ambient Color
 		   gl.uniform3f(

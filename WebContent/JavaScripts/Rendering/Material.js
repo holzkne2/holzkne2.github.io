@@ -94,8 +94,9 @@ class StandardMaterial {
 	    
 	    this.shaderProgram.worldSpaceCameraPos = gl.getUniformLocation(this.shaderProgram, "uWorldSpaceCameraPos");
 
-	    this.shaderProgram.shadowMaps;
 	    this.shaderProgram.shadowMaps = gl.getUniformLocation(this.shaderProgram, "uShadowMap");
+	    
+	    this.shaderProgram.mainTexture = gl.getUniformLocation(this.shaderProgram, "uTexture");
 	    
 	    this.shaderProgram.cascadeEndClipSpace = [3];
 	    this.shaderProgram.cascadeEndClipSpace[0] = gl.getUniformLocation(this.shaderProgram, "uCascadeEndClipSpace[0]");

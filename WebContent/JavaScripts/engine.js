@@ -175,7 +175,7 @@ function computeBox(viewProjection, lightView)
 
 function computeShadowProjection(view, projection, lightView) {	
 	var zNear = scene.camera.near;
-	var zFar = 200;
+	var zFar = 300;
 	var fov = toRadians(scene.camera.fov);
 	var ratio = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
 	
@@ -259,12 +259,47 @@ function drawScene() {
 	}
 	
 	// Draw Objects
-	{
+	{		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, mainRenderTarget.fb);
 	    gl.viewport(0, 0, mainRenderTarget.textureWidth, mainRenderTarget.textureHeight);
 	    gl.clearColor(0.1, 0.1, 0.1, 1.0);
 	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	
+	    // Draw Skybox
+	    gl.depthMask(false);
+	    if (scene.skybox.model.meshes.length > 0)
+	    {
+	    	var program = scene.skybox.material.shaderProgram;
+	    	var mesh = scene.skybox.model.meshes[0];
+	    	mesh.init(gl);
+	    	gl.useProgram(program);
+	    	
+	    	gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexPositionBuffer);
+		    gl.vertexAttribPointer(program.vertexPositionAttribute,
+		    		mesh.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexTextureCoordBuffer);
+		    gl.vertexAttribPointer(program.textureCoordAttribute,
+		    		mesh.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		    gl.activeTexture(gl.TEXTURE0);
+		    gl.bindTexture(gl.TEXTURE_2D, scene.skybox.material.mainTexture.texture);
+		    gl.uniform1i(program.mainTexture, 0);
+		    
+		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.vertexIndexBuffer);	    
+		    
+		    var worldMatrix = mat4.create();
+		    mat4.fromScaling(worldMatrix, vec3.fromValues(200,200,200));
+		    var mvMatrix = mat4.create();
+		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+		    
+		    gl.uniformMatrix4fv(program.pMatrixUniform, false, pMatrix);
+		    gl.uniformMatrix4fv(program.mvMatrixUniform, false, mvMatrix);
+		    
+		    gl.drawElements(gl.TRIANGLES, mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	    }
+	    gl.depthMask(true);
+	    
 	    
 	    for (var i = 0; i < scene.gameObjects.length; i++)
 	    {
@@ -386,10 +421,6 @@ function loadShip() {
     Missing.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     Missing.color = [1, 0, 1];
     
-//    sandstoneTexture = new Texture();
-//    sandstoneTexture.init(gl, "Assets/Textures/glass.gif");
-//    standardMat.texture0 = sandstoneTexture;
-    
     var obj = new GameObject();
     var renderer = new MeshRenderer();
     var shipMesh = new Model();
@@ -413,22 +444,14 @@ function loadShip() {
 	scene.camera.target = obj;
 }
 
-function newAstroid() {
-	var mesh = new Mesh();
-    mesh.cube();
-    var model = new Model();
-    model.meshes.push(mesh);
-    model.init(gl);
+function newAstroid(model, material) {
+	
     var obj = new GameObject();
     var renderer = new MeshRenderer();
     renderer.model = model;
-    renderer.materials.push(new StandardMaterial());
-    renderer.materials[0].color = [0.62, 0.63, 0.55];
-    renderer.materials[0].metallic = 0.7;
-    renderer.materials[0].smoothness = 10.0;
-    renderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    renderer.materials.push(material);
     
-    obj.position = vec3.fromValues(Math.random() * 200 - 100,
+    obj.position = vec3.fromValues(Math.random() * 2000 - 1000,
     		Math.random() * 200 - 100, Math.random() * 200 - 100);
     
     var scale = Math.random() * 9 + 1;
@@ -445,6 +468,7 @@ function webGLStart() {
     initGL(canvas);
     
     scene = new Scene();
+    scene.skybox.init(gl);
     timer = new Timer();
     
     screenQuad = new Mesh();
@@ -470,27 +494,36 @@ function webGLStart() {
     
     cascadeEnd = [4];   
     
-    
-    for (var i = 0; i < 50; i++) {
-    	newAstroid();
+    {
+        var model = new Model();
+        model.load("Assets/Models/Astroid.obj");
+        model.init(gl);
+    	
+        var material = new StandardMaterial();
+        material.color = [0.53, 0.46, 0.33];
+        material.metallic = 0.3;
+        material.smoothness = 1.0;
+        material.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+	    
+        for (var i = 0; i < 100; i++) {
+	    	newAstroid(model, material);
+	    }
     }
     
-    var mesh = new Mesh();
-    mesh.cube();
     var model = new Model();
-    model.meshes.push(mesh);
+    model.load("Assets/Models/Astroid.obj");
     model.init(gl);
     var obj = new GameObject();
     var renderer = new MeshRenderer();
     renderer.model = model;
     renderer.materials.push(new StandardMaterial());
-    renderer.materials[0].color = [0.62, 0.63, 0.55];
-    renderer.materials[0].metallic = 0.7;
-    renderer.materials[0].smoothness = 10.0;
+    renderer.materials[0].color = [0.53, 0.46, 0.33];
+    renderer.materials[0].metallic = 0.3;
+    renderer.materials[0].smoothness = 1.0;
     renderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     
-    obj.position = vec3.fromValues(0,0,-4);
-    obj.scale = vec3.fromValues(2,2,2);
+    obj.position = vec3.fromValues(0,0,-7.5);
+    obj.scale = vec3.fromValues(5,5,5);
     obj.meshRenderer = renderer;
     scene.AddGameObject(obj);
     

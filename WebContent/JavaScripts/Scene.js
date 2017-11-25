@@ -6,6 +6,7 @@ class Scene {
 		cameraObj.camera = new Camera();
 		cameraObj.camera.gameObject = cameraObj;
 		this.camera = cameraObj.camera;
+		this.skybox = new Skybox();
 	}
 	
 	AddGameObject(obj) {
