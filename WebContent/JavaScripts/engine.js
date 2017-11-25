@@ -350,59 +350,8 @@ function resizeCanvas() {
     mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 }
 
-function webGLStart() {
-    var canvas = document.getElementById("Game-canvas");
-    initGL(canvas);
-    
-    scene = new Scene();
-    timer = new Timer();
-    
-    screenQuad = new Mesh();
-    screenQuad.screen();
-    screenQuad.init(gl);
-    
-    screenMat = new StandardMaterial();
-    screenMat.init(gl, passthroughPostFragment, simplePostVertex);
-    
-    mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
-    
-    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
-    shadowMaps[0].pMatrix = mat4.create();
-    mat4.ortho(shadowMaps[0].pMatrix, -10, 10, -10, 10, -10.0, 20);
-    
-    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
-    shadowMaps[1].pMatrix = mat4.create();
-    mat4.ortho(shadowMaps[1].pMatrix, -200, 200, -200, 200, -200, 500);
-   
-    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
-    shadowMaps[2].pMatrix = mat4.create();
-    mat4.ortho(shadowMaps[2].pMatrix, -80, 80, -80, 80, 80.0, 260);    
-    
-    
-    cascadeEnd = [4];
-    
-    
-    
-    var cubeMesh = new Mesh();
-    cubeMesh.cube();
-    var cubeModel = new Model();
-    cubeModel.meshes.push(cubeMesh);
-    cubeModel.init(gl);
-    var Cubeobj = new GameObject();
-    var Cuberenderer = new MeshRenderer();
-    Cuberenderer.model = cubeModel;
-    Cuberenderer.materials.push(new StandardMaterial());
-    Cuberenderer.materials[0].color = [0.62, 0.63, 0.55];
-    Cuberenderer.materials[0].metallic = 0.7;
-    Cuberenderer.materials[0].smoothness = 10.0;
-    Cuberenderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
-    Cubeobj.position = vec3.fromValues(0, 0, -4);
-    Cubeobj.scale = vec3.fromValues(2,2,2);
-    Cubeobj.meshRenderer = Cuberenderer;
-    scene.AddGameObject(Cubeobj);
-    
-    
-    var LightColor = new StandardMaterial();
+function loadShip() {
+	var LightColor = new StandardMaterial();
     LightColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     LightColor.color = [0.62, 0.63, 0.55];
     LightColor.metallic = 0.7;
@@ -438,8 +387,8 @@ function webGLStart() {
     Missing.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     Missing.color = [1, 0, 1];
     
-    sandstoneTexture = new Texture();
-    sandstoneTexture.init(gl, "Assets/Textures/glass.gif");
+//    sandstoneTexture = new Texture();
+//    sandstoneTexture.init(gl, "Assets/Textures/glass.gif");
 //    standardMat.texture0 = sandstoneTexture;
     
     var obj = new GameObject();
@@ -463,6 +412,90 @@ function webGLStart() {
     
 	scene.camera.gameObject.position =  vec3.fromValues(0, 0, 3)
 	scene.camera.target = obj;
+}
+
+function newAstroid() {
+	var mesh = new Mesh();
+    mesh.cube();
+    var model = new Model();
+    model.meshes.push(mesh);
+    model.init(gl);
+    var obj = new GameObject();
+    var renderer = new MeshRenderer();
+    renderer.model = model;
+    renderer.materials.push(new StandardMaterial());
+    renderer.materials[0].color = [0.62, 0.63, 0.55];
+    renderer.materials[0].metallic = 0.7;
+    renderer.materials[0].smoothness = 10.0;
+    renderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    
+    obj.position = vec3.fromValues(Math.random() * 200 - 100,
+    		Math.random() * 200 - 100, Math.random() * 200 - 100);
+    
+    var scale = Math.random() * 9 + 1;
+    obj.scale = vec3.fromValues(scale,scale,scale);
+    
+    quat.fromEuler(obj.rotation, Math.random() * 360, Math.random() * 360, Math.random() * 360);
+    obj.meshRenderer = renderer;
+    
+    scene.AddGameObject(obj);
+}
+
+function webGLStart() {
+    var canvas = document.getElementById("Game-canvas");
+    initGL(canvas);
+    
+    scene = new Scene();
+    timer = new Timer();
+    
+    screenQuad = new Mesh();
+    screenQuad.screen();
+    screenQuad.init(gl);
+    
+    screenMat = new StandardMaterial();
+    screenMat.init(gl, passthroughPostFragment, simplePostVertex);
+    
+    mainRenderTarget = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+    
+    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
+    shadowMaps[0].pMatrix = mat4.create();
+//    mat4.ortho(shadowMaps[0].pMatrix, -10, 10, -10, 10, -10.0, 20);
+    
+    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
+    shadowMaps[1].pMatrix = mat4.create();
+//    mat4.ortho(shadowMaps[1].pMatrix, -200, 200, -200, 200, -200, 500);
+   
+    shadowMaps.push(new DepthTexture(gl, 2048, 2048));
+    shadowMaps[2].pMatrix = mat4.create();
+//    mat4.ortho(shadowMaps[2].pMatrix, -80, 80, -80, 80, 80.0, 260);    
+    
+    cascadeEnd = [4];   
+    
+    
+    for (var i = 0; i < 50; i++) {
+    	newAstroid();
+    }
+    
+    var mesh = new Mesh();
+    mesh.cube();
+    var model = new Model();
+    model.meshes.push(mesh);
+    model.init(gl);
+    var obj = new GameObject();
+    var renderer = new MeshRenderer();
+    renderer.model = model;
+    renderer.materials.push(new StandardMaterial());
+    renderer.materials[0].color = [0.62, 0.63, 0.55];
+    renderer.materials[0].metallic = 0.7;
+    renderer.materials[0].smoothness = 10.0;
+    renderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
+    
+    obj.position = vec3.fromValues(0,0,-4);
+    obj.scale = vec3.fromValues(2,2,2);
+    obj.meshRenderer = renderer;
+    scene.AddGameObject(obj);
+    
+    loadShip();
     
 	gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -476,7 +509,7 @@ function webGLStart() {
     document.onmousemove = handleMouseMove;
     
     window.addEventListener('mousewheel', handleMouseWheel, false);
- // Firefox
+    // Firefox
     window.addEventListener("DOMMouseScroll", handleMouseWheel, false);
     
     window.addEventListener('resize', resizeCanvas, false);
