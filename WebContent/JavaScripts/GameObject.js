@@ -5,14 +5,20 @@ class GameObject {
 		this.scale = vec3.fromValues(1, 1, 1);
 		
 		this.name = name;
+		
+		this.positionLast;
+		this.rotationLast;
+		this.scaleLast;
+		
+		this.worldMatrix;
 	}
 	
 	WorldMatrix(){
-		var world = mat4.create();
-	    
-		mat4.fromRotationTranslationScale(world, this.rotation, this.position, this.scale);
-		
-	    
-	    return world;
+		if (this.positionLast !== this.postion || this.rotationLast !== this.rotation || this.scaleLast !== this.scale) {
+			this.worldMatrix = mat4.create();
+			mat4.fromRotationTranslationScale(this.worldMatrix, this.rotation, this.position, this.scale);
+		    this.positionLast = this.postion; this.rotationLast = this.rotation; this.scaleLast = this.scale;
+		}
+		return this.worldMatrix;
 	}
 }

@@ -148,12 +148,13 @@ var fragmentColorShaderSource =`#version 300 es
 	}
 
 	float CalcShadowFactor(int CascadeIndex, vec4 LightSpacePos) {
-		vec3 fragmentDepth = LightSpacePos.xyz;
+		vec3 fragmentDepth = LightSpacePos.xyz / LightSpacePos.w;
+		vec3 normal = normalize(vNormal);
 		
-		float cosLight = min(max(dot(uLightingDirection, normalize(vNormal)), 0.0), 1.0);
+		float cosLight = clamp(dot(-uLightingDirection, normal), 0.0, 1.0);
 		
-		float shadowAcneRemover = 0.007; //* tan(acos(cosLight));
-    //	shadowAcneRemover = clamp(shadowAcneRemover, 0.0, 0.007);
+		float shadowAcneRemover = 0.005 * tan(acos(cosLight));
+    	shadowAcneRemover = clamp(shadowAcneRemover, 0.0, 0.007);
     	fragmentDepth.z -= shadowAcneRemover;
     	
     	float amountInLight = 0.0;

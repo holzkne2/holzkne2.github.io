@@ -175,7 +175,7 @@ function computeBox(viewProjection, lightView)
 
 function computeShadowProjection(view, projection, lightView) {	
 	var zNear = scene.camera.near;
-	var zFar = 300;
+	var zFar = 100;
 	var fov = toRadians(scene.camera.fov);
 	var ratio = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
 	
@@ -199,9 +199,9 @@ function computeShadowProjection(view, projection, lightView) {
 		mat4.multiply(cameraViewProjection, cameraViewProjection, view);
 	
 		var box = computeBox(cameraViewProjection, lightView);
-		mat4.ortho(shadowMaps[i].pMatrix, box.bottomLeft[0], box.topRight[0],
-				box.bottomLeft[1], box.topRight[1],
-				-box.topRight[2], -box.bottomLeft[2]);
+		mat4.ortho(shadowMaps[i].pMatrix, box.bottomLeft[0] * 2, box.topRight[0] * 2,
+				box.bottomLeft[1] * 2, box.topRight[1] * 2,
+				-box.topRight[2] * 2, -box.bottomLeft[2] * 2);
 	}
 	
 	zNear = splitFar[i];
