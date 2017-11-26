@@ -29,6 +29,10 @@ class Camera {
 		mat4.perspective(matrix, toRadians(this.fov), aspect, this.near, this.far);
 	}
 	
+	skyboxPerspective(aspect, matrix) {
+		mat4.perspective(matrix, toRadians(this.fov), aspect, 10000,  1000000);
+	}
+	
 	viewMatrix() {
 		var view = this.gameObject.WorldMatrix();
 		return mat4.invert(view, view);

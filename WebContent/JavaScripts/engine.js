@@ -286,14 +286,36 @@ function drawScene() {
 		    gl.bindTexture(gl.TEXTURE_2D, scene.skybox.material.mainTexture.texture);
 		    gl.uniform1i(program.mainTexture, 0);
 		    
+		    gl.uniform3f(program.worldSpaceCameraPos,
+		    		scene.camera.gameObject.position[0],
+	    			scene.camera.gameObject.position[1],
+	    			scene.camera.gameObject.position[2]);
+		    
+		    var adjustedLD = vec3.create();
+		    vec3.normalize(adjustedLD, lightingDirection);
+		    vec3.scale(adjustedLD, adjustedLD, -1);
+		    gl.uniform3fv(program.lightingDirectionUniform, adjustedLD);
+		    
+		    gl.uniform3f(
+		    		program.directionalColorUniform,
+		        1,
+		        1,
+		        0.9
+		    );
+		    
 		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.vertexIndexBuffer);	    
 		    
 		    var worldMatrix = mat4.create();
-		    mat4.fromRotationTranslationScale(worldMatrix, quat.create(), scene.camera.gameObject.position, vec3.fromValues(200,200,200));
+		    mat4.fromRotationTranslationScale(worldMatrix, quat.create(), scene.camera.gameObject.position, vec3.fromValues(80000,80000,80000));
 		    var mvMatrix = mat4.create();
 		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
 		    
-		    gl.uniformMatrix4fv(program.pMatrixUniform, false, pMatrix);
+			var pSkyMatrix = mat4.create();
+		    scene.camera.skyboxPerspective(mainRenderTarget.textureWidth / mainRenderTarget.textureHeight, pSkyMatrix);
+
+		    
+		    gl.uniformMatrix4fv(program.pMatrixUniform, false, pSkyMatrix);
+		    gl.uniformMatrix4fv(program.objectToWorld, false, worldMatrix);
 		    gl.uniformMatrix4fv(program.mvMatrixUniform, false, mvMatrix);
 		    
 		    gl.drawElements(gl.TRIANGLES, mesh.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);

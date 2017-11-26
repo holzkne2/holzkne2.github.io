@@ -32,14 +32,29 @@ uniform vec3 uDirectionalColor;
 in vec2 vTextureCoord;
 in vec3 vWorldPos;
 
+float remap(float value, float low1, float high1, float low2, float high2) {
+	return (value - low1) * (high2 - low2) / (high1 - low1) + low2;
+}
+
 void main(void) {
 	vec3 viewDirection = normalize(uWorldSpaceCameraPos - vWorldPos);
 	vec3 lightDirection = normalize(uLightingDirection);
 	vec3 lightColor = uDirectionalColor;
 	
-	vec3 col = texture(uTexture, vTextureCoord).rgb;
+	vec3 stars = texture(uTexture, vTextureCoord).rgb;
+	
+	vec3 ray = -viewDirection;
+	
+	vec3 delta = lightDirection - ray;
+	float dist = length(delta);
+	float spot = 1.0 - smoothstep(0.0, 0.25, dist);
+	float ss = spot * spot;
+	vec3 sun = ss * lightColor;
+	
+	vec3 col = stars + sun;
+	
 	fragmentColor = vec4(col.rgb, 1.0);
-	//fragmentColor = vec4(vTextureCoord.rg, 1.0, 1.0);
+	//fragmentColor.rgb = viewDirection; 
 }
 `;
 
