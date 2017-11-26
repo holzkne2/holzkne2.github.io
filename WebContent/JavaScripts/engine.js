@@ -289,7 +289,7 @@ function drawScene() {
 		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.vertexIndexBuffer);	    
 		    
 		    var worldMatrix = mat4.create();
-		    mat4.fromScaling(worldMatrix, vec3.fromValues(200,200,200));
+		    mat4.fromRotationTranslationScale(worldMatrix, quat.create(), scene.camera.gameObject.position, vec3.fromValues(200,200,200));
 		    var mvMatrix = mat4.create();
 		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
 		    
