@@ -12,7 +12,7 @@ out vec3 vWorldPos;
 void main(void) {
 	gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     vWorldPos = (uObjectToWorld * vec4(aVertexPosition, 1.0)).xyz;
-    vTextureCoord = aTextureCoord * 4.0;
+    vTextureCoord = aTextureCoord * 10.0;
 }
 
 
