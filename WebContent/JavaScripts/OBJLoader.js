@@ -80,14 +80,20 @@ function fileLoaded(data, model) {
 	}
 }
 
+var loadingObjects = 0;
+
 function OBJLoader(meshFile, mesh) {
-	
+	loadingObjects += 1;
+	document.getElementById("loadingtext").textContent = "Loading Object(s)...";
 	var request = new XMLHttpRequest();
     request.open("GET", meshFile);
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
-        	fileLoaded(request.responseText, mesh);
-        	document.getElementById("loadingtext").textContent = "";
+        	fileLoaded(request.responseText, mesh)
+        	loadingObjects -= 1;
+        	if (loadingObjects == 0) {
+        		document.getElementById("loadingtext").textContent = "";
+        	}
         }
     }
     request.send();

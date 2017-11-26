@@ -216,6 +216,7 @@ function computeShadowProjection(view, projection, lightView) {
 
 function drawScene() {
 	
+	
 	var lightingDirection = vec3.create();
 	
 	var lightRotation = quat.create();
@@ -235,6 +236,7 @@ function drawScene() {
     computeShadowProjection(viewMatrix, pMatrix, lightViewMatrix);
 //	calcOthoProjs(lightRotation);
 	
+    gl.disable(gl.CULL_FACE);
 	// Draw Shadows
 	for (var s = 0; s < 3; s++)
 	{
@@ -257,6 +259,8 @@ function drawScene() {
 		    renderer.renderShadow(gl, mvLightMatrix, shadowMaps[s].pMatrix);
 	    }
 	}
+	gl.enable(gl.CULL_FACE);
+	gl.cullFace(gl.FRONT);
 	
 	// Draw Objects
 	{		
@@ -349,6 +353,7 @@ function drawScene() {
 	}
 	
 	//Draw Post Processing
+	gl.depthMask(false);
 	{
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -382,8 +387,63 @@ function drawScene() {
 	    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
 	    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
 	    
-	    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
+	    
+//	    {
+//	    	var worldMatrix = mat4.create();
+//	    	mat4.fromRotationTranslationScale(worldMatrix, quat.create(), vec3.fromValues(0,1-1/6,0), vec3.fromValues(1/6, 1/6, 1));
+//		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+//	    	
+//	    	gl.useProgram(screenMat.shaderProgram);
+//			
+//			gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
+//		    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
+//		    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+//
+//		    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
+//		    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
+//		    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+//
+//		    gl.activeTexture(gl.TEXTURE0);
+//		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[0].texture);
+//		    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
+//		    
+//		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
+//		    
+//		    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
+//		    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
+//		    
+//		    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
+//	    }
+//	    
+//	    {
+//	    	var worldMatrix = mat4.create();
+//	    	mat4.fromRotationTranslationScale(worldMatrix, quat.create(), vec3.fromValues(1/6 + 1/18,1-1/6,0), vec3.fromValues(1/6, 1/6, 1));
+//		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+//	    	
+//	    	gl.useProgram(screenMat.shaderProgram);
+//			
+//			gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
+//		    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
+//		    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+//
+//		    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
+//		    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
+//		    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+//
+//		    gl.activeTexture(gl.TEXTURE0);
+//		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[1].texture);
+//		    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
+//		    
+//		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
+//		    
+//		    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
+//		    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
+//		    
+//		    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
+//	    }
 	}
+	gl.depthMask(true);
 }
 
 function tick() {
