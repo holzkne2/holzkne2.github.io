@@ -1,0 +1,9 @@
+@charset "ISO-8859-1";
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+
+html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+
+canvas { display:block; } /* To remove the scrollbars */
+
+#loadingtext { position:absolute; top:50%; width: 100%; font-size:4em; color: blue; text-align: center; }
+#FPS_Counter { position:absolute; top:0%; left: 0%; font-size:2em; color: yellow; }
