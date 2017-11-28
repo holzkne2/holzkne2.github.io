@@ -34,7 +34,7 @@ class Camera {
 	}
 	
 	skyboxPerspective(aspect, matrix) {
-		mat4.perspective(matrix, toRadians(this.fov), aspect, 10000,  1000000);
+		mat4.perspective(matrix, toRadians(this.fov), aspect, 700, 2000);
 	}
 	
 	viewMatrix() {

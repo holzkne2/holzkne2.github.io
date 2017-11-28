@@ -24,7 +24,11 @@ class Timer {
 		}
 		sum /= this.fpsBuffer.length;
 		
-		document.getElementById("FPS_Counter").textContent = "FPS: " + Math.round(sum);
+		if (showFPS) {
+			document.getElementById("FPS_Counter").textContent = "FPS: " + Math.round(sum);
+		} else {
+			document.getElementById("FPS_Counter").textContent = "";
+		}
 	}
 }
 

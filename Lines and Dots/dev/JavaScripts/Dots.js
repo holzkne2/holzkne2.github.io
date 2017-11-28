@@ -3,12 +3,12 @@ class Dots {
 		this.is_init = false;
 	}
 	
-	init(gl) {
+	init(gl, radius) {
 		if (this.is_init) {
 			return;
 		}
 		
-		this.sphere();
+		this.sphere(radius);
 		
 		this.vertexPositionBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
@@ -25,8 +25,7 @@ class Dots {
 		this.is_init = true;
 	}
 	
-	sphere() {
-		var radius = 0.1;
+	sphere(radius) {
 		var latBands = 20;
 		var longBands = 20;
 		this.vertices = [];

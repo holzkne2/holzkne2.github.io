@@ -5,6 +5,10 @@ var lines;
 var screen;
 var mainRenderTexture;
 
+var skybox;
+
+var showFPS = false;
+
 function initGL(canvas) {
 	try {
 		 gl = canvas.getContext("webgl2");
@@ -28,16 +32,39 @@ function render() {
     var mvpMatrix = mat4.create();
     mat4.multiply(mvpMatrix, pMatrix, vMatrix);
     
-	// Render Dots & Lines
+    // Render Scene
     {
-    	gl.depthMask(true);
     	gl.bindFramebuffer(gl.FRAMEBUFFER, mainRenderTexture.fb);
         gl.viewport(0, 0, gl.viewportWidth, mainRenderTexture.textureHeight);
         gl.clearColor(0.95, 0.95, 0.95, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
-    	lines.renderLines(gl, mvpMatrix);
-    	lines.renderDots(gl, mvpMatrix);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+    	
+	    // Render Skybox
+	    {
+	    	gl.depthMask(false);
+	    	gl.clear(gl.DEPTH_BUFFER_BIT);
+	    	
+	    	var pMatrixSkybox = mat4.create();
+	    	camera.skyboxPerspective(mainRenderTexture.textureWidth / mainRenderTexture.textureHeight, pMatrixSkybox);
+	    	
+	    	var vMatrixSkybox = mat4.create();
+	    	mat4.fromQuat(vMatrixSkybox, camera.gameObject.rotation);
+	    	mat4.invert(vMatrixSkybox, vMatrixSkybox);
+	        
+	        var mvpMatrixSkybox = mat4.create();
+	        mat4.multiply(mvpMatrixSkybox, pMatrixSkybox, vMatrixSkybox);
+	        
+	        skybox.render(gl, mvpMatrixSkybox, camera);
+	    }
+	    
+		// Render Dots & Lines
+	    {
+	    	gl.depthMask(true);
+	    	gl.clear(gl.DEPTH_BUFFER_BIT);
+	        
+	    	lines.renderLines(gl, mvpMatrix);
+	    	lines.renderDots(gl, mvpMatrix);
+	    }
     }
     
     // Post Processing
@@ -87,6 +114,9 @@ function webGLStart() {
     
     lines = new Lines();
     lines.init(gl);
+    
+    skybox = new Skybox();
+    skybox.init(gl);
     
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;

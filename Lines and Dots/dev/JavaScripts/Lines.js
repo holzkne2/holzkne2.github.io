@@ -18,6 +18,8 @@ class Lines {
 	constructor() {
 		this.count = 200;
 		
+		this.color = [0, 0, 0]
+		
 		this.points = [];
 		this.start = [];
 		this.end = [];
@@ -36,7 +38,10 @@ class Lines {
 		
 		gl.uniformMatrix4fv(this.material.shaderProgram.mvpMatrixUniform, false, mvpMatrix);
 		
-		gl.uniform3f(this.material.shaderProgram.color, 0,0,0);
+		gl.uniform3f(this.material.shaderProgram.color, 
+				this.color[0],
+				this.color[1],
+				this.color[2]);
 		
 		gl.drawArrays(gl.LINE_LOOP, 0, this.vertexPositionBuffer.numItems);
 	}
@@ -61,7 +66,10 @@ class Lines {
 			
 			gl.uniformMatrix4fv(this.material.shaderProgram.mvpMatrixUniform, false, mvpMatrix);
 			
-			gl.uniform3f(this.material.shaderProgram.color, 0,0,0);
+			gl.uniform3f(this.material.shaderProgram.color,
+					this.color[0],
+					this.color[1],
+					this.color[2]);
 			
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.dots.vertexIndexBuffer);
 			gl.drawElements(gl.TRIANGLES, this.dots.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
@@ -71,7 +79,7 @@ class Lines {
 	init(gl) {
 		this.material.init(gl);
 		
-		this.dots.init(gl);
+		this.dots.init(gl, 0.1);
 		
 		this.points = [];
 		for (var i = 0; i < this.count; i++) {
