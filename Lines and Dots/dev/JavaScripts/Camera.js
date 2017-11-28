@@ -8,13 +8,13 @@ function toRadians(deg) {
 	
 class Camera {
 	constructor () {
-		this.fov = 90;
+		this.fov = 45;
 		this.near = 0.1;
 		this.far = 1000;
 		
 		this.target = vec3.fromValues(0,0,0);
 		
-		this.distance = 10;
+		this.distance = 25;
 		
 		this.xSpeed = 1;
 		this.ySpeed = 10;

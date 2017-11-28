@@ -16,15 +16,18 @@ function remap(value, low1, high1, low2, high2) {
 
 class Lines {
 	constructor() {
+		this.count = 200;
+		
 		this.points = [];
 		this.start = [];
 		this.end = [];
 		this.speed = [];
 		this.progress = [];
 		this.material = new UnlitColorMaterial();
+		this.dots = new Dots();
 	}
 	
-	render(gl, mvpMatrix) {
+	renderLines(gl, mvpMatrix) {
 		gl.useProgram(this.material.shaderProgram);
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
@@ -38,11 +41,40 @@ class Lines {
 		gl.drawArrays(gl.LINE_LOOP, 0, this.vertexPositionBuffer.numItems);
 	}
 	
+	renderDots(gl, vpMatrix) {
+		gl.useProgram(this.material.shaderProgram);
+		
+		for (var i = 0; i < this.count; i++) {
+			
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.dots.vertexPositionBuffer);
+			gl.vertexAttribPointer(this.material.shaderProgram.vertexPositionAttribute,
+					this.dots.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			
+			var mMatrix = mat4.create();
+			mat4.fromTranslation(mMatrix, vec3.fromValues(
+					this.points[i * 3],
+					this.points[i * 3 + 1],
+					this.points[i * 3 + 2]
+			));
+			var mvpMatrix = mat4.create();
+			mat4.multiply(mvpMatrix, vpMatrix, mMatrix);
+			
+			gl.uniformMatrix4fv(this.material.shaderProgram.mvpMatrixUniform, false, mvpMatrix);
+			
+			gl.uniform3f(this.material.shaderProgram.color, 0,0,0);
+			
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.dots.vertexIndexBuffer);
+			gl.drawElements(gl.TRIANGLES, this.dots.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		}
+	}
+	
 	init(gl) {
 		this.material.init(gl);
 		
+		this.dots.init(gl);
+		
 		this.points = [];
-		for (var i = 0; i < 50; i++) {
+		for (var i = 0; i < this.count; i++) {
 	    	var vector = vec3.create();
 	    	vec3.random(vector, 1);
 	    	
@@ -68,15 +100,6 @@ class Lines {
 	    	this.points.push(posS[1]);
 	    	this.points.push(posS[2]);
 		}
-//		this.points.push(-0.5);
-//		this.points.push(-0.5);
-//		this.points.push(0.5);
-//		this.points.push(0.5);
-//		this.points.push(0.5);
-//		this.points.push(0.5);
-//		this.points.push(0.5);
-//		this.points.push(-0.5);
-//		this.points.push(0.5);
 		
 		this.vertexPositionBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
@@ -92,7 +115,7 @@ class Lines {
 			return;
 		}
 		
-		for (var i = 0; i < 50; i++) {
+		for (var i = 0; i < this.count; i++) {
 			var pos = lerp(this.start[i], this.end[i], this.progress[i]);
 	    	
 	    	this.progress[i] += this.speed[i] * deltaTime;
