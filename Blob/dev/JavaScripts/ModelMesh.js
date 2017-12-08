@@ -1,6 +1,8 @@
 class Model {
 	constructor() {
 		this.meshes = [];
+		
+		this.ready = false;
 	}
 	
 	load(file) {
@@ -41,7 +43,7 @@ class Mesh {
 	init(gl) {
 		if (this.is_init) {
 			return;
-		}
+		}		
 		
 		this.vertexPositionBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);

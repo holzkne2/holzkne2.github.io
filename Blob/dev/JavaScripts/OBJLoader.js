@@ -78,6 +78,8 @@ function fileLoaded(data, model) {
 		}
 		model.meshes.push(subMesh);
 	}
+	
+	model.ready = true;
 }
 
 var loadingObjects = 0;
