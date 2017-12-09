@@ -18,8 +18,8 @@ class MoveData {
 	constructor(origin, radius, speed) {
 		this.origin = origin;
 		this.radius = radius;
-		this.a = origin;
-		this.b = origin;
+		this.a = vec3.create();
+		this.b = vec3.create();
 		this.speed = speed;
 		this.progress = 1;
 	}
@@ -45,8 +45,7 @@ class Lines {
 		
 		this.color = [0, 0, 0]
 		
-//		this.mesh = new Model();
-//		OBJLoader("SphereMesh.obj", this.mesh);
+		this.innerMesh = new InnerMesh();
 		
 		this.points = [];
 		this.moveData = [];
@@ -55,8 +54,6 @@ class Lines {
 	}
 	
 	renderLines(gl, mvpMatrix) {
-//		if (!this.mesh.is_init)
-//			return;
 		
 		gl.useProgram(this.material.shaderProgram);
 		
@@ -132,6 +129,9 @@ class Lines {
 			 ];
 		this.count = this.points.length / 3;
 		
+		this.innerMesh.init(gl, this.points);		
+		
+		
 		for (var i = 0; i < this.points.length; i++) {
 			this.points[i] *= radius;
 		}
@@ -182,10 +182,16 @@ class Lines {
 //			9, 8, 1
 //		];
 		
+		var moveRadius = vec3.distance(
+				vec3.fromValues(this.points[0], this.points[1], this.points[2]),
+				vec3.fromValues(this.points[3], this.points[4], this.points[5])
+		);
+		moveRadius /= 2;
+		
 		this.moveData = [];
 		for (var i = 0; i < this.count; i++) {
 	    	var data = new MoveData(vec3.fromValues(this.points[i*3], this.points[i*3+1], this.points[i*3+2]),
-	    			0.5, remap(Math.random(), 0, 1, 0.2, 0.3));
+	    			moveRadius, remap(Math.random(), 0, 1, 0.2, 0.3));
 	    	this.moveData.push(data);
 		}
 		
@@ -205,7 +211,7 @@ class Lines {
 	update(gl) {
 		var deltaTime = (timer.deltaTime / 1000);
 		
-		if (deltaTime > 0.5) {
+		if (deltaTime > 1.0 / 23.0) {
 			return;
 		}
 		
@@ -228,5 +234,6 @@ class Lines {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.points), gl.DYNAMIC_DRAW);
 		
+		this.innerMesh.update(gl, this.points);
 	}
 }

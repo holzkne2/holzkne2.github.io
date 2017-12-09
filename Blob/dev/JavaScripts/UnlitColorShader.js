@@ -16,6 +16,7 @@ out vec4 fragmentColor;
 uniform vec3 uColor;
 
 void main(void) {
+	vec3 col = uColor;
 	fragmentColor = vec4(uColor, 1.0);
 }
 `;

@@ -62,8 +62,12 @@ function render() {
 	    	gl.depthMask(true);
 	    	gl.clear(gl.DEPTH_BUFFER_BIT);
 	        
-	    	lines.renderLines(gl, mvpMatrix);
-	    	lines.renderDots(gl, mvpMatrix);
+	    	if (options.lines)
+	    		lines.renderLines(gl, mvpMatrix);
+	    	if (options.dots)
+	    		lines.renderDots(gl, mvpMatrix);
+	    	if (options.mesh)
+	    		lines.innerMesh.render(gl, mvpMatrix, mat4.create());
 	    }
     }
     
@@ -91,6 +95,8 @@ function tick() {
 	requestAnimFrame(tick);
 	timer.update();
 	handleKeys();
+	
+	options.update();
 	
 	lines.update(gl);
 	

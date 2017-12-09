@@ -39,6 +39,9 @@ void main(void) {
 	
 	vec3 col = lerp(uTopColor, uBottomColor, y);
 	
+	col[0] = clamp(col[0], 0.0, 1.0);
+	col[1] = clamp(col[1], 0.0, 1.0);
+	col[2] = clamp(col[2], 0.0, 1.0);
 	fragmentColor = vec4(col, 1.0);
 }
 `;
