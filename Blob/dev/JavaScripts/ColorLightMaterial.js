@@ -60,6 +60,38 @@ class ColorLightMaterial {
 	    
 	    gl.useProgram(null);
 	    
+	    this.init_normalDepth(gl);
+	    
 	    this.is_init = true;
+	}
+	
+	init_normalDepth(gl) {
+		var fragmentShader = getShader(DepthNormalFragmentSource, "x-shader/x-fragment");
+	    var vertexShader = getShader(DepthNormalVertexSource, "x-shader/x-vertex");
+	    
+	    this.NDshaderProgram = gl.createProgram();
+	    gl.attachShader(this.NDshaderProgram, vertexShader);
+	    gl.attachShader(this.NDshaderProgram, fragmentShader);
+	    gl.linkProgram(this.NDshaderProgram);
+	    
+	    if (!gl.getProgramParameter(this.NDshaderProgram, gl.LINK_STATUS)) {
+	        alert("Could not initialise Normal Depth shaders");
+	        return;
+	    }
+	    
+	    gl.useProgram(this.NDshaderProgram);
+	    
+	    this.NDshaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.NDshaderProgram, "aVertexPosition");
+	    gl.enableVertexAttribArray(this.NDshaderProgram.vertexPositionAttribute);
+	    
+	    this.NDshaderProgram.vertexNormalAttribute = gl.getAttribLocation(this.NDshaderProgram, "aVertexNormal");
+	    gl.enableVertexAttribArray(this.NDshaderProgram.vertexNormalAttribute);
+	    
+	    this.NDshaderProgram.nMatrixUniform = gl.getUniformLocation(this.NDshaderProgram, "uNmatrix");
+	    	    
+	    this.NDshaderProgram.mvpMatrixUniform = gl.getUniformLocation(this.NDshaderProgram, "uMVPmatrix");
+	    this.NDshaderProgram.mvMatrixUniform = gl.getUniformLocation(this.NDshaderProgram, "uMVmatrix");
+	    
+	    gl.useProgram(null);
 	}
 }

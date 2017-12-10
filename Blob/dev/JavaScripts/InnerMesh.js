@@ -31,6 +31,30 @@ class InnerMesh {
 		];
 	}
 	
+	render_normalDepth(gl, mvpMatrix, mMatrix, mvMatrix)
+	{
+		gl.useProgram(this.material.NDshaderProgram);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
+		gl.vertexAttribPointer(this.material.NDshaderProgram.vertexPositionAttribute,
+				this.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexNormalBuffer);
+	    gl.vertexAttribPointer(this.material.NDshaderProgram.vertexNormalAttribute,
+	    		this.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		
+		gl.uniformMatrix4fv(this.material.NDshaderProgram.mvpMatrixUniform, false, mvpMatrix);
+		
+		gl.uniformMatrix4fv(this.material.NDshaderProgram.mvMatrixUniform, false, mvMatrix);
+		
+		var normalMatrix = mat3.create();
+	    mat3.normalFromMat4(normalMatrix, mMatrix);
+		gl.uniformMatrix3fv(this.material.NDshaderProgram.nMatrixUniform, false, normalMatrix);
+		
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.vertexIndexBuffer);
+		gl.drawElements(gl.TRIANGLES, this.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	}
+	
 	render(gl, mvpMatrix, mMatrix)
 	{
 		gl.useProgram(this.material.shaderProgram);

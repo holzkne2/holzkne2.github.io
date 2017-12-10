@@ -4,6 +4,7 @@ var lines;
 
 var screen;
 var mainRenderTexture;
+var normalDepthRenderTexture;
 
 var skybox;
 
@@ -73,13 +74,27 @@ function render() {
     
     // Post Processing
     {
-    	gl.depthMask(false);
-    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clearColor(0, 0, 0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
-        screen.render(gl, mainRenderTexture.texture);
+    	// SSAO
+    	{
+    		gl.depthMask(true);
+	    	gl.bindFramebuffer(gl.FRAMEBUFFER, normalDepthRenderTexture.fb);
+	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	        gl.clearColor(0, 0, 0, 1.0);
+	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	        
+    		lines.innerMesh.render_normalDepth(gl, mvpMatrix, mat4.create(), vMatrix);
+    	}
+    	
+    	// Vig and Gamma Correction
+    	{
+	    	gl.depthMask(false);
+	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	        gl.clearColor(0, 0, 0, 1.0);
+	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	        
+	        screen.render(gl, mainRenderTexture.texture);
+    	}
     }
 }
 
@@ -114,6 +129,7 @@ function webGLStart() {
     screen = new Screen();
     screen.init(gl);
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
     camera = new Camera();
     camera.gameObject = new GameObject();

@@ -33,3 +33,34 @@ void main(void) {
 	fragmentColor = vec4(col, 1.0);
 }
 `;
+
+var DepthNormalVertexSource = `#version 300 es
+in vec3 aVertexPosition;
+in vec3 aVertexNormal;
+
+uniform mat4 uMVPmatrix;
+uniform mat4 uMVmatrix;
+uniform mat3 uNmatrix;
+
+out vec3 vNormal;
+out float vViewDepth;
+
+void main(void) {
+	gl_Position = uMVPmatrix * vec4(aVertexPosition, 1.0);
+	vNormal = uNmatrix * aVertexNormal;
+	vViewDepth = (uMVmatrix * vec4(aVertexPosition, 1.0)).z;
+}
+`;
+
+var DepthNormalFragmentSource = `#version 300 es
+precision mediump float;
+
+in vec3 vNormal;
+in float vViewDepth;
+
+out vec4 fragmentColor;
+
+void main(void) {
+	fragmentColor = vec4(vNormal, vViewDepth);
+}
+`;
