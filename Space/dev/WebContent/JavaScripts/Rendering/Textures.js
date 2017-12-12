@@ -38,8 +38,8 @@ class Texture {
 
 class RenderTexture {
 	constructor(gl, width, height) {
-		this.textureWidth = width;
-		this.textureHeight = height;
+		this.textureWidth = width * 2;
+		this.textureHeight = height * 2;
 		this.texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 		{
