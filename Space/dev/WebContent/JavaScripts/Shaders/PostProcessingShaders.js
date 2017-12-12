@@ -21,6 +21,8 @@ var passthroughPostFragment = `
 	
 	void main(void) {
 		vec3 col = texture2D(uSampler, vTextureCoord).rgb;
+		float gamma = 1.0 / 1.1;
+		col = pow(col, vec3(gamma, gamma, gamma));
 		gl_FragColor = vec4(col, 1.0);
 	}
 	`;

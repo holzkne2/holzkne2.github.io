@@ -10,7 +10,7 @@ class Camera {
 	constructor () {
 		this.fov = 45;
 		this.near = 0.1;
-		this.far = 1000;
+		this.far = 100;
 		
 		this.target = vec3.fromValues(0,0,0);
 		

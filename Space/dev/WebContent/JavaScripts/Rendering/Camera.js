@@ -4,7 +4,7 @@ function clamp(num, min, max) {
 
 class Camera {
 	constructor () {
-		this.fov = 90;
+		this.fov = 45;
 		this.near = 0.1;
 		this.far = 1000;
 		
@@ -19,7 +19,7 @@ class Camera {
 		this.yMaxLimit = 80;
 		
 		this.distanceMin = 6;
-		this.distanceMax = 25;
+		this.distanceMax = 35;
 		
 		this.x = 0;
 		this.y = 0

@@ -1,4 +1,4 @@
-function lerp(x, y, t) {
+function lerpvec3(x, y, t) {
 	var a = vec3.create();
 	vec3.scale(a, x, (1.0 - t));
 	
@@ -219,7 +219,7 @@ class Lines {
 		
 		for (var i = 0; i < this.count; i++) {
 			var data = this.moveData[i];
-			var pos = lerp(data.a, data.b, data.progress);
+			var pos = lerpvec3(data.a, data.b, data.progress);
 	    	
 			data.progress += data.speed * deltaTime;
 
