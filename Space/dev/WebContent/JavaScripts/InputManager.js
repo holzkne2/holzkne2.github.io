@@ -24,6 +24,11 @@ function handleMouseMove(event) {
 function handleKeyDown(event) {
 	inputManager.currentlyPressedKeys[event.keyCode] = true;
 	
+	// F key (show FPS)
+	if (inputManager.currentlyPressedKeys[70] === true) {
+		showFPS = !showFPS;
+	}
+	
 }
 
 function handleKeyUp(event) {

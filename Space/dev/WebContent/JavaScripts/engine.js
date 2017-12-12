@@ -4,7 +4,7 @@
 
 var gl;
 var scene;
-var timer;
+var showFPS = false;
 var mainRenderTarget;
 var shadowMaps = [];
 var screenQuad;
@@ -35,86 +35,6 @@ cascadeEnd = [4];
 
 function toRadians(deg) {
 	return deg * Math.PI / 180;
-}
-
-// obsolete
-function calcOthoProjs(lightR) {
-	// Get Camera Rotation
-	var camInv = mat4.create();
-	mat4.fromQuat(camInv, scene.camera.gameObject.rotation);
-	mat4.invert(camInv, camInv);
-	
-	// Get Light Rotation
-	var lightM = mat4.create();
-	mat4.fromQuat(lightM, lightR);
-	
-	var LightCamMatrix = mat4.create();
-	mat4.multiply(LightCamMatrix, lightM, camInv);
-	
-	// Aspect Ration
-	var ar = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
-	// Horizonal
-	var tanHalfHFOV = Math.tan(toRadians(scene.camera.fov / 2.0));
-	// Vertical
-	var tanHalfVFOV = Math.tan(toRadians((scene.camera.fov * ar) / 2.0));
-	
-	for(var i = 0; i < 3; i++) {
-		var xn = cascadeEnd[i] * tanHalfHFOV;
-		var xf = cascadeEnd[i + 1] * tanHalfHFOV;
-		var yn = cascadeEnd[i] * tanHalfVFOV;
-		var yf = cascadeEnd[i + 1] * tanHalfVFOV;
-		
-		var frustumCorners = [
-			// near
-			xn, yn, cascadeEnd[i], 1,
-			-xn, yn, cascadeEnd[i], 1,
-			xn, -yn, cascadeEnd[i], 1,
-			-xn, -yn, cascadeEnd[i], 1,
-			
-			// far
-			xf, yf, cascadeEnd[i + 1], 1,
-			-xf, yf, cascadeEnd[i + 1], 1,
-			xf, -yf, cascadeEnd[i + 1], 1,
-			-xf, -yf, cascadeEnd[i + 1], 1				
-		];
-		
-		var frustumCornersL = [8 * 4];
-		
-		var minX = 1000000;
-		var maxX = -1000000;
-		var minY = 1000000;
-		var maxY = -1000000;
-		var minZ = 1000000;
-		var maxZ = -100000;
-		
-		for(var j = 0; j < 8; j++) {
-			var vW = vec4.fromValues(frustumCorners[j*4],
-					frustumCorners[j*4 + 1],
-					frustumCorners[j*4 + 2],
-					frustumCorners[j*4 + 3]);
-			
-			var fcL = vec4.create();
-			vec4.transformMat4(fcL, vW, LightCamMatrix);
-			
-			frustumCornersL[j * 4] = fcL[0];
-			frustumCornersL[j * 4 + 1] = fcL[1];
-			frustumCornersL[j * 4 + 2] = fcL[2];
-			frustumCornersL[j * 4 + 3] = fcL[3];
-			
-			minX = Math.min(minX, frustumCornersL[j * 4]);
-			maxX = Math.max(maxX, frustumCornersL[j * 4]);
-			minY = Math.min(minY, frustumCornersL[j * 4 + 1]);
-			maxY = Math.max(maxY, frustumCornersL[j * 4 + 1]);
-			minZ = Math.min(minZ, frustumCornersL[j * 4 + 2]);
-			maxZ = Math.max(maxZ, frustumCornersL[j * 4 + 2]);
-		}
-		
-		mat4.ortho(shadowMaps[i].pMatrix, minX, maxX, minY, maxY, minZ, maxZ);  
-		if (i == 0) {
-//			console.log(minX, maxX, minY, maxY, minZ, maxZ);
-			console.log(frustumCorners);
-		}
-	}	
 }
 
 // Lerp
@@ -175,7 +95,7 @@ function computeBox(viewProjection, lightView)
 
 function computeShadowProjection(view, projection, lightView) {	
 	var zNear = scene.camera.near;
-	var zFar = 100;
+	var zFar = 150;
 	var fov = toRadians(scene.camera.fov);
 	var ratio = mainRenderTarget.textureWidth / mainRenderTarget.textureHeight;
 	
@@ -551,7 +471,6 @@ function webGLStart() {
     
     scene = new Scene();
     scene.skybox.init(gl);
-    timer = new Timer();
     
     screenQuad = new Mesh();
     screenQuad.screen();
