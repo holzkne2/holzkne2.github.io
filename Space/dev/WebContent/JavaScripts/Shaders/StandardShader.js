@@ -167,11 +167,6 @@ var fragmentColorShaderSource =`#version 300 es
 				amountInLight += 0.25;
 			}
 		}
-//		float texelDepth = decodeFloat(texture(uShadowMap[CascadeIndex],
-//				fragmentDepth.xy));
-//		if (fragmentDepth.z < texelDepth) {
-//			amountInLight = 1.0;
-//		}
 		
 		return amountInLight;
 	}
@@ -208,23 +203,6 @@ var fragmentColorShaderSource =`#version 300 es
        	col = col * amountInLight;
         
         fragmentColor = vec4(col + (uAmbientColor * albedo), 1);
-        
-//        fragmentColor.g = amountInLight;
-//        amountInLight = 0.0;
-//        //fragmentColor.rgb = vec3(0.0,0.0,0.0);
-//        for (int i = 0; i < NUM_CASCADES ; i++){
-//			if (vClipSpacePosZ <= uCascadeEndClipSpace[i]) {
-//				break;
-//			}
-//			amountInLight += 0.25;
-//		}
-//		
-//		fragmentColor.r = amountInLight;
-//		
-////		fragmentColor.r = CalcShadowFactor(0, vLightSpacePos[0]);
-////		fragmentColor.g = CalcShadowFactor(2, vLightSpacePos[1]);
-////		fragmentColor.b = CalcShadowFactor(2, vLightSpacePos[2]);
-//        //fragmentColor = vec4(amountInLight, amountInLight, amountInLight, 1);
     }`
 	;
 
