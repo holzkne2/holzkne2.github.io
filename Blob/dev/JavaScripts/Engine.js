@@ -4,8 +4,8 @@ var lines;
 
 var screen;
 var mainRenderTexture;
-var normalDepthRenderTexture;
-var ssao;
+//var normalDepthRenderTexture;
+//var ssao;
 
 var skybox;
 
@@ -76,32 +76,30 @@ function render() {
     // Post Processing
     {
     	// Normal & Depth Data
-    	{
-    		gl.depthMask(true);
-	    	gl.bindFramebuffer(gl.FRAMEBUFFER, normalDepthRenderTexture.fb);
-	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	        gl.clearColor(0, 0, 0, 1.0);
-	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	        
-    		lines.innerMesh.render_normalDepth(gl, mvpMatrix, mat4.create(), vMatrix);
-    	}
+//    	{
+//    		gl.depthMask(true);
+//	    	gl.bindFramebuffer(gl.FRAMEBUFFER, normalDepthRenderTexture.fb);
+//	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+//	        gl.clearColor(0, 0, 0, 1.0);
+//	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+//	        
+//    		lines.innerMesh.render_normalDepth(gl, mvpMatrix, mat4.create(), vMatrix);
+//    	}
     	
     	// SSAO
-    	if(true)
-    	{
-    		gl.depthMask(false);
-	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	        gl.clearColor(0, 0, 0, 1.0);
-	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	        
-	        ssao.render(gl, normalDepthRenderTexture.texture,
-	        		mainRenderTexture.textureWidth / mainRenderTexture.textureHeight,
-	        		Math.tan(camera.fov/2), pMatrix);
-    	}
+//    	{
+//    		gl.depthMask(false);
+//	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+//	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+//	        gl.clearColor(0, 0, 0, 1.0);
+//	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+//	        
+//	        ssao.render(gl, normalDepthRenderTexture.texture,
+//	        		mainRenderTexture.textureWidth / mainRenderTexture.textureHeight,
+//	        		Math.tan(camera.fov/2), pMatrix);
+//    	}
     	
     	// Vig and Gamma Correction
-    	if (false)
     	{
 	    	gl.depthMask(false);
 	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -109,7 +107,7 @@ function render() {
 	        gl.clearColor(0, 0, 0, 1.0);
 	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	        
-	        screen.render(gl, normalDepthRenderTexture.texture);
+	        screen.render(gl, mainRenderTexture.texture);
     	}
     }
 }
@@ -120,7 +118,7 @@ function resizeCanvas() {
     gl.viewportHeight = canvas.height = window.innerHeight;
     
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
-    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+//    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 
 }
 
@@ -147,10 +145,10 @@ function webGLStart() {
     screen = new Screen();
     screen.init(gl);
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
-    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+//    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-    ssao = new SSAO();
-    ssao.init(gl);
+//    ssao = new SSAO();
+//    ssao.init(gl);
     
     camera = new Camera();
     camera.gameObject = new GameObject();

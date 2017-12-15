@@ -14,7 +14,7 @@ class Camera {
 		
 		this.target = vec3.fromValues(0,0,0);
 		
-		this.distance = 25;
+		this.distance = 20;
 		
 		this.xSpeed = 1;
 		this.ySpeed = 10;
