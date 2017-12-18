@@ -1,3 +1,11 @@
+
+# Blob
+Controls:
+- Click Mouse to Rotate
+- "o" key to toggle options menu
+
+https://holzkne2.github.io/Blob/release/index.html
+
 # Lines and Dots
 Controls:
 - Click Mouse to Rotate
