@@ -78,6 +78,7 @@ function render() {
     // Post Processing
     {
     	// Normal & Depth Data
+<<<<<<< HEAD
     	if (false)
     	{
     		gl.depthMask(true);
