@@ -388,19 +388,19 @@ function loadShip() {
     LightColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     LightColor.color = [0.62, 0.63, 0.55];
     LightColor.metallic = 0.7;
-    LightColor.smoothness = 10.0;
+    LightColor.smoothness = 0.5;
     
     var DarkColor = new StandardMaterial();
     DarkColor.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     DarkColor.color = [0.24, 0.26, 0.23];
     DarkColor.metallic = 0.7;
-    DarkColor.smoothness = 10.0;
+    DarkColor.smoothness = 0.5;
     
     var HullLights = new StandardMaterial();
     HullLights.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     HullLights.color = [0.72, 0.73, 0.65];
     HullLights.metallic = 0.7;
-    HullLights.smoothness = 10.0;
+    HullLights.smoothness = 0.5;
     
     var EngineExhast = new StandardMaterial();
     EngineExhast.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
@@ -409,8 +409,8 @@ function loadShip() {
     var GoldBall = new StandardMaterial();
     GoldBall.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     GoldBall.color = [1, 0.84, 0];
-    GoldBall.metallic = 0.5;
-    GoldBall.smoothness = 5.0;
+    GoldBall.metallic = 0.8;
+    GoldBall.smoothness = 0.5;
     
     var RingLight = new StandardMaterial();
     RingLight.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
@@ -499,8 +499,8 @@ function webGLStart() {
     	
         var material = new StandardMaterial();
         material.color = [0.53, 0.46, 0.33];
-        material.metallic = 0.3;
-        material.smoothness = 1.0;
+        material.metallic = 0.1;
+        material.smoothness = 0.0;
         material.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
 	    
         for (var i = 0; i < 100; i++) {
@@ -516,8 +516,8 @@ function webGLStart() {
     renderer.model = model;
     renderer.materials.push(new StandardMaterial());
     renderer.materials[0].color = [0.53, 0.46, 0.33];
-    renderer.materials[0].metallic = 0.3;
-    renderer.materials[0].smoothness = 1.0;
+    renderer.materials[0].metallic = 0.1;
+    renderer.materials[0].smoothness = 0.0;
     renderer.materials[0].init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     
     obj.position = vec3.fromValues(0,0,-7.5);
