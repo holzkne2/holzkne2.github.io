@@ -37,7 +37,7 @@ function render() {
     // Render Scene
     {
     	gl.bindFramebuffer(gl.FRAMEBUFFER, mainRenderTexture.fb);
-        gl.viewport(0, 0, gl.viewportWidth, mainRenderTexture.textureHeight);
+        gl.viewport(0, 0, mainRenderTexture.textureWidth, mainRenderTexture.textureHeight);
         gl.clearColor(0.95, 0.95, 0.95, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
     	
@@ -76,6 +76,7 @@ function render() {
     // Post Processing
     {
     	// Normal & Depth Data
+    	if (false)
     	{
     		gl.depthMask(true);
 	    	gl.bindFramebuffer(gl.FRAMEBUFFER, normalDepthRenderTexture.fb);
@@ -87,7 +88,7 @@ function render() {
     	}
     	
     	// SSAO
-    	if(true)
+    	if(false)
     	{
     		gl.depthMask(false);
 	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -101,7 +102,7 @@ function render() {
     	}
     	
     	// Vig and Gamma Correction
-    	if (false)
+    	if (true)
     	{
 	    	gl.depthMask(false);
 	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -109,7 +110,7 @@ function render() {
 	        gl.clearColor(0, 0, 0, 1.0);
 	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	        
-	        screen.render(gl, normalDepthRenderTexture.texture);
+	        screen.render(gl, mainRenderTexture.texture);
     	}
     }
 }

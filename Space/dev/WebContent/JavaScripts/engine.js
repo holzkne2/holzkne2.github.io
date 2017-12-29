@@ -163,7 +163,7 @@ function drawScene() {
 		gl.bindFramebuffer(gl.FRAMEBUFFER, shadowMaps[s].fb);
 		gl.viewport(0, 0, shadowMaps[s].textureWidth, shadowMaps[s].textureHeight);
 	    gl.clearColor(0, 0, 0, 1.0);
-	    gl.clearDepth(1.0)
+	    gl.clearDepth(1.0);
 	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	    
 	    for (var i = 0; i < scene.gameObjects.length; i++)
@@ -230,15 +230,12 @@ function drawScene() {
 		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.vertexIndexBuffer);	    
 		    
 		    var worldMatrix = mat4.create();
-		    mat4.fromRotationTranslationScale(worldMatrix, quat.create(), scene.camera.gameObject.position, vec3.fromValues(80000,80000,80000));
+		    mat4.fromRotationTranslationScale(worldMatrix, quat.create(), scene.camera.gameObject.position, vec3.fromValues(1,1,1));
 		    var mvMatrix = mat4.create();
 		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
 		    
-			var pSkyMatrix = mat4.create();
-		    scene.camera.skyboxPerspective(mainRenderTarget.textureWidth / mainRenderTarget.textureHeight, pSkyMatrix);
-
 		    
-		    gl.uniformMatrix4fv(program.pMatrixUniform, false, pSkyMatrix);
+		    gl.uniformMatrix4fv(program.pMatrixUniform, false, pMatrix);
 		    gl.uniformMatrix4fv(program.objectToWorld, false, worldMatrix);
 		    gl.uniformMatrix4fv(program.mvMatrixUniform, false, mvMatrix);
 		    
@@ -309,59 +306,59 @@ function drawScene() {
 	    
 	    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
 	    
-//	    {
-//	    	var worldMatrix = mat4.create();
-//	    	mat4.fromRotationTranslationScale(worldMatrix, quat.create(), vec3.fromValues(0,1-1/6,0), vec3.fromValues(1/6, 1/6, 1));
-//		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
-//	    	
-//	    	gl.useProgram(screenMat.shaderProgram);
-//			
-//			gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
-//		    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
-//		    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-//
-//		    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
-//		    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
-//		    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-//
-//		    gl.activeTexture(gl.TEXTURE0);
-//		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[0].texture);
-//		    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
-//		    
-//		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
-//		    
-//		    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
-//		    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
-//		    
-//		    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
-//	    }
-//	    
-//	    {
-//	    	var worldMatrix = mat4.create();
-//	    	mat4.fromRotationTranslationScale(worldMatrix, quat.create(), vec3.fromValues(1/6 + 1/18,1-1/6,0), vec3.fromValues(1/6, 1/6, 1));
-//		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
-//	    	
-//	    	gl.useProgram(screenMat.shaderProgram);
-//			
-//			gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
-//		    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
-//		    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-//
-//		    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
-//		    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
-//		    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-//
-//		    gl.activeTexture(gl.TEXTURE0);
-//		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[1].texture);
-//		    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
-//		    
-//		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
-//		    
-//		    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
-//		    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
-//		    
-//		    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
-//	    }
+	    {
+	    	var worldMatrix = mat4.create();
+	    	mat4.fromRotationTranslationScale(worldMatrix, quat.create(), vec3.fromValues(0,1-1/6,0), vec3.fromValues(1/6, 1/6, 1));
+		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+	    	
+	    	gl.useProgram(screenMat.shaderProgram);
+			
+			gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
+		    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
+		    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
+		    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
+		    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		    gl.activeTexture(gl.TEXTURE0);
+		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[0].texture);
+		    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
+		    
+		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
+		    
+		    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
+		    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
+		    
+		    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
+	    }
+	    
+	    {
+	    	var worldMatrix = mat4.create();
+	    	mat4.fromRotationTranslationScale(worldMatrix, quat.create(), vec3.fromValues(1/6 + 1/18,1-1/6,0), vec3.fromValues(1/6, 1/6, 1));
+		    mat4.multiply(mvMatrix, viewMatrix, worldMatrix);
+	    	
+	    	gl.useProgram(screenMat.shaderProgram);
+			
+			gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexPositionBuffer);
+		    gl.vertexAttribPointer(screenMat.shaderProgram.vertexPositionAttribute,
+		    		screenQuad.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		    gl.bindBuffer(gl.ARRAY_BUFFER, screenQuad.vertexTextureCoordBuffer);
+		    gl.vertexAttribPointer(screenMat.shaderProgram.textureCoordAttribute,
+		    		screenQuad.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		    gl.activeTexture(gl.TEXTURE0);
+		    gl.bindTexture(gl.TEXTURE_2D, shadowMaps[1].texture);
+		    gl.uniform1i(screenMat.shaderProgram.samplerUniform, 0);
+		    
+		    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, screenQuad.vertexIndexBuffer);	    
+		    
+		    gl.uniformMatrix4fv(screenMat.shaderProgram.pMatrixUniform, false, pMatrix);
+		    gl.uniformMatrix4fv(screenMat.shaderProgram.mvMatrixUniform, false, mvMatrix);
+		    
+		    gl.drawElements(gl.TRIANGLES, screenQuad.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0); 
+	    }
 	}
 	gl.depthMask(true);
 }
