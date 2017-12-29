@@ -132,9 +132,10 @@ var fragmentColorShaderSource =`#version 300 es
 		vec2( 0.14383161, -0.14100790 ) 
 	);	
 
-	float decodeFloat (vec4 color) {
-	  const vec4 bitShift = vec4(
-	    1.0 / (256.0 * 256.0 * 256.0),
+	float decodeFloat (vec3 color) {
+	//return color.r;
+	
+	  const vec3 bitShift = vec3(
 	    1.0 / (256.0 * 256.0),
 	    1.0 / 256.0,
 	    1
@@ -162,7 +163,7 @@ var fragmentColorShaderSource =`#version 300 es
 		for (int i = 0; i < 4; i++){
 			int index = int(16.0 * random(vec4(fragmentDepth.xyy, i))) % 16;
 			float texelDepth = decodeFloat(texture(uShadowMap[CascadeIndex],
-				fragmentDepth.xy + poissonDisk[index]/1400.0));
+				fragmentDepth.xy + poissonDisk[index]/1400.0).rgb);
 			if (fragmentDepth.z < texelDepth) {
 				amountInLight += 0.25;
 			}
@@ -241,25 +242,24 @@ var lightVertexGLSL = `
 var lightFragmentGLSL = `
 	precision mediump float;
 
-	vec4 encodeFloat (float depth) {
-	  const vec4 bitShift = vec4(
-	    256 * 256 * 256,
+	vec3 encodeFloat (float depth) {
+	//return vec4(depth, depth, depth, 1);
+	  const vec3 bitShift = vec3(
 	    256 * 256,
 	    256,
 	    1.0
 	  );
-	  const vec4 bitMask = vec4(
+	  const vec3 bitMask = vec3(
 	    0,
-	    1.0 / 256.0,
 	    1.0 / 256.0,
 	    1.0 / 256.0
 	  );
-	  vec4 comp = fract(depth * bitShift);
-	  comp -= comp.xxyz * bitMask;
+	  vec3 comp = fract(depth * bitShift);
+	  comp -= comp.xxy * bitMask;
 	  return comp;
 	}
 
 	void main (void) {
-	  gl_FragColor = encodeFloat(gl_FragCoord.z);
+	  gl_FragColor = vec4(encodeFloat(gl_FragCoord.z), 1.0);
 	}`
 	;

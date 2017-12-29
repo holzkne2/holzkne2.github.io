@@ -44,7 +44,7 @@ void main(void) {
 	vec3 stars = texture(uTexture, vTextureCoord).rgb;
 	
 	float gamma = 2.2;
-	stars = pow(stars, vec3(2.2, 2.2, 2.2));
+	stars = pow(stars, vec3(gamma, gamma, gamma));
 	
 	vec3 ray = -viewDirection;
 	
