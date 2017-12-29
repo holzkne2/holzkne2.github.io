@@ -6,6 +6,8 @@ var screen;
 var mainRenderTexture;
 var normalDepthRenderTexture;
 var ssao;
+//var normalDepthRenderTexture;
+//var ssao;
 
 var skybox;
 
@@ -103,6 +105,32 @@ function render() {
     	
     	// Vig and Gamma Correction
     	if (true)
+=======
+//    	{
+//    		gl.depthMask(true);
+//	    	gl.bindFramebuffer(gl.FRAMEBUFFER, normalDepthRenderTexture.fb);
+//	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+//	        gl.clearColor(0, 0, 0, 1.0);
+//	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+//	        
+//    		lines.innerMesh.render_normalDepth(gl, mvpMatrix, mat4.create(), vMatrix);
+//    	}
+    	
+    	// SSAO
+//    	{
+//    		gl.depthMask(false);
+//	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+//	    	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+//	        gl.clearColor(0, 0, 0, 1.0);
+//	        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+//	        
+//	        ssao.render(gl, normalDepthRenderTexture.texture,
+//	        		mainRenderTexture.textureWidth / mainRenderTexture.textureHeight,
+//	        		Math.tan(camera.fov/2), pMatrix);
+//    	}
+    	
+    	// Vig and Gamma Correction
+>>>>>>> 1c5a52a150054e6c211c3e7c7fafb96cbccfdf33
     	{
 	    	gl.depthMask(false);
 	    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -122,6 +150,7 @@ function resizeCanvas() {
     
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+//    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 
 }
 
@@ -149,9 +178,12 @@ function webGLStart() {
     screen.init(gl);
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
+//    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
     ssao = new SSAO();
     ssao.init(gl);
+//    ssao = new SSAO();
+//    ssao.init(gl);
     
     camera = new Camera();
     camera.gameObject = new GameObject();
