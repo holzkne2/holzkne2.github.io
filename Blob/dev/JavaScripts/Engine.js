@@ -4,8 +4,6 @@ var lines;
 
 var screen;
 var mainRenderTexture;
-var normalDepthRenderTexture;
-var ssao;
 //var normalDepthRenderTexture;
 //var ssao;
 
@@ -150,7 +148,6 @@ function resizeCanvas() {
     gl.viewportHeight = canvas.height = window.innerHeight;
     
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
-    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 //    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 
 }
@@ -178,11 +175,8 @@ function webGLStart() {
     screen = new Screen();
     screen.init(gl);
     mainRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
-    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
 //    normalDepthRenderTexture = new RenderTexture(gl, gl.viewportWidth, gl.viewportHeight);
     
-    ssao = new SSAO();
-    ssao.init(gl);
 //    ssao = new SSAO();
 //    ssao.init(gl);
     
