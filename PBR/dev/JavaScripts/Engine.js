@@ -6,6 +6,8 @@ var mainRenderTexture;
 
 var showFPS = false;
 
+var sphereSingle
+
 function initGL(canvas) {
 	try {
 		 gl = canvas.getContext("webgl2");
@@ -53,8 +55,10 @@ function render() {
 		// Render Objects
 	    {
 	    	gl.depthMask(true);
-	        
 	    	
+	    	sphereSingle.meshRenderer.render(gl,
+	    			pMatrix, sphereSingle.WorldMatrix(), vMatrix,
+	    			camera, [-1, 0.5, 0.25]);
 	    }
     }
     
@@ -107,7 +111,17 @@ function webGLStart() {
     camera = new Camera();
     camera.gameObject = new GameObject();
     
+    sphereSingle = new GameObject();
+    sphereSingle.meshRenderer = new MeshRenderer();
+    sphereSingle.meshRenderer.model.meshes[0] = new Mesh();
+    sphereSingle.meshRenderer.model.meshes[0].sphere(1);
     
+    sphereSingle.meshRenderer.materials[0] = new PBRMaterial();
+    sphereSingle.meshRenderer.materials[0].albedo = [1.0, 0.0, 0.0];
+    sphereSingle.meshRenderer.materials[0].metallic = 0.0;
+    sphereSingle.meshRenderer.materials[0].roughness = 0.5;
+    
+    sphereSingle.meshRenderer.init(gl);
     
     skybox.init(gl);
     

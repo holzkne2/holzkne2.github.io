@@ -11,7 +11,7 @@ out vec3 vNormal;
 out vec3 vWorldPos;
 
 void main(void) {
-	gl_position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+	gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 	vWorldPos = (uObjectToWorld * vec4(aVertexPosition, 1.0)).xyz;
     
     vNormal = uNMatrix * aVertexNormal;
@@ -107,10 +107,13 @@ void main(void) {
     float NdotL = max(dot(N, L), 0.0);                
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
     
-    vec3 ambient = uAmbientColor * albedo * 0.02;
+    vec3 ambient = vec3(0.03, 0.03, 0.03) * albedo;
     vec3 col = ambient + Lo;
     
     col = col / (col + vec3(1.0, 1.0, 1.0));
+    float gamma = 1.0/2.2;
+	col = pow(col, vec3(gamma, gamma, gamma));
+    
     fragmentColor = vec4(col, 1.0);
 }
 `;

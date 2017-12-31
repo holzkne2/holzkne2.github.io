@@ -17,7 +17,7 @@ varying vec2 vTextureCoord;
 uniform sampler2D uTexture;
 
 void main(void) {
-	vec3 col = texture2D(uTexture, vTextureCoord).rgb;
+	vec3 col = pow(texture2D(uTexture, vTextureCoord).rgb, vec3(2.2, 2.2, 2.2));
 	
 	vec2 uvs = vTextureCoord * (1.0 - vTextureCoord.yx);
 	

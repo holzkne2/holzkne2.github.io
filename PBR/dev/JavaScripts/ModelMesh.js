@@ -75,8 +75,8 @@ class Mesh {
 	}
 	
 	sphere(radius) {
-		var latBands = 20;
-		var longBands = 20;
+		var latBands = 40;
+		var longBands = 40;
 		this.vertices = [];
 		
 		for (var lat = 0; lat <= latBands; lat++) {

@@ -35,7 +35,9 @@ vec3 lerp (vec3 a, vec3 b, float t) {
 void main(void) {
 	vec3 viewDirection = normalize(vec3(0.0, 0.0, 0.0) - vWorldPos);
 	
-	float y = remap(viewDirection.y, -0.3, 0.3, 0.0, 1.0);
+	//float y = remap(viewDirection.y, -0.3, 0.3, 0.0, 1.0);
+	float y = remap(viewDirection.y, -1.0, 1.0, 0.0, 1.0);
+	
 	
 	vec3 col = lerp(uTopColor, uBottomColor, y);
 	
@@ -50,8 +52,8 @@ class Skybox {
 	constructor() {
 		this.model = new Model();
 		
-		this.topColor = [0.95, 0.95, 0.95];
-		this.bottomColor = [0.95, 0.95, 0.95];
+		this.topColor = [1.0, 1.0, 1.0];
+		this.bottomColor = [0.0, 0.0, 0.0];
 	}
 	
 	render(gl, mvpMatrix, camera) {
