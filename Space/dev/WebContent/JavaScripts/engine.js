@@ -409,8 +409,8 @@ function loadShip() {
     var GoldBall = new StandardMaterial();
     GoldBall.init(gl, fragmentColorShaderSource, vertexColorShaderSource);
     GoldBall.color = [1, 0.84, 0];
-    GoldBall.metallic = 0.8;
-    GoldBall.smoothness = 0.5;
+    GoldBall.metallic = 0.5;
+    GoldBall.smoothness = 0.7;
     
     var RingLight = new StandardMaterial();
     RingLight.init(gl, fragmentColorUnlitShaderSource, vertexColorUnlitShaderSource);
