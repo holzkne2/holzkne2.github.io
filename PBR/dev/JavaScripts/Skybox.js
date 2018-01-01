@@ -2,16 +2,13 @@ var skyboxVertexSoruce =`#version 300 es
 in vec3 aVertexPosition;
 
 uniform mat4 uMVPmatrix;
-uniform mat4 uObjectToWorld;
 
-out vec3 vWorldPos;
+out vec3 vLocalPos;
 
 void main(void) {
 	gl_Position = uMVPmatrix * vec4(aVertexPosition, 1.0);
-    vWorldPos = (uObjectToWorld * vec4(aVertexPosition, 1.0)).xyz;
+    vLocalPos = aVertexPosition;
 }
-
-
 `;
 
 var skyboxFragmentSource = `#version 300 es
@@ -19,31 +16,22 @@ precision mediump float;
 
 out vec4 fragmentColor;
 
-uniform vec3 uTopColor;
-uniform vec3 uBottomColor;
+in vec3 vLocalPos;
 
-in vec3 vWorldPos;
+uniform sampler2D uEquirectangularMap;
 
-float remap(float value, float low1, float high1, float low2, float high2) {
-	return (value - low1) * (high2 - low2) / (high1 - low1) + low2;
-}
-
-vec3 lerp (vec3 a, vec3 b, float t) {
-	return a * (1.0 - t) + b * (t);
+vec2 SampleSphericalMap(vec3 v)
+{
+	vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+	uv *= vec2(0.1591, 0.3183);
+	uv += 0.5;
+	return uv; 
 }
 
 void main(void) {
-	vec3 viewDirection = normalize(vec3(0.0, 0.0, 0.0) - vWorldPos);
+	vec2 uv = SampleSphericalMap(normalize(vLocalPos));
+	vec3 col = texture(uEquirectangularMap, uv).rgb;
 	
-	//float y = remap(viewDirection.y, -0.3, 0.3, 0.0, 1.0);
-	float y = remap(viewDirection.y, -1.0, 1.0, 0.0, 1.0);
-	
-	
-	vec3 col = lerp(uTopColor, uBottomColor, y);
-	
-	col[0] = clamp(col[0], 0.0, 1.0);
-	col[1] = clamp(col[1], 0.0, 1.0);
-	col[2] = clamp(col[2], 0.0, 1.0);
 	fragmentColor = vec4(col, 1.0);
 }
 `;
@@ -51,9 +39,6 @@ void main(void) {
 class Skybox {
 	constructor() {
 		this.model = new Model();
-		
-		this.topColor = [1.0, 1.0, 1.0];
-		this.bottomColor = [0.0, 0.0, 0.0];
 	}
 	
 	render(gl, mvpMatrix, camera) {
@@ -65,24 +50,21 @@ class Skybox {
 		
 		gl.uniformMatrix4fv(this.shaderProgram.mvpMatrixUniform, false, mvpMatrix);
 		
-		gl.uniform3f(this.shaderProgram.topColor,
-				this.topColor[0],
-				this.topColor[1],
-				this.topColor[2]);
-		gl.uniform3f(this.shaderProgram.bottomColor,
-				this.bottomColor[0],
-				this.bottomColor[1],
-				this.bottomColor[2]);
-		
-		gl.uniformMatrix4fv(this.shaderProgram.objectToWorld, false, mat4.create());
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, this.texture.texture);
+		gl.uniform1i(this.shaderProgram.equirectangularMap, 0);
 		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.model.meshes[0].vertexIndexBuffer);
 		gl.drawElements(gl.TRIANGLES, this.model.meshes[0].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 	}
 	
 	init(gl) {
+		var texture = new Texture();
+	    texture.init(gl, "Alexs_Apt_8k.jpg");
+		this.texture = texture;
+		
 		this.model.meshes[0] = new Mesh();
-		this.model.meshes[0].sphere(1);
+		this.model.meshes[0].cube();
 		this.model.init(gl)
 		
 		var fragmentShader = getShader(skyboxFragmentSource, "x-shader/x-fragment");
@@ -103,14 +85,9 @@ class Skybox {
 	    this.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
 	    gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
 	    
+	    this.shaderProgram.equirectangularMap = gl.getUniformLocation(this.shaderProgram, "uEquirectangularMap");
+	    
 	    this.shaderProgram.mvpMatrixUniform = gl.getUniformLocation(this.shaderProgram, "uMVPmatrix");
-	    
-	    this.shaderProgram.topColor = gl.getUniformLocation(this.shaderProgram, "uTopColor");
-	    this.shaderProgram.bottomColor = gl.getUniformLocation(this.shaderProgram, "uBottomColor");
-	    
-	    this.shaderProgram.objectToWorld = gl.getUniformLocation(this.shaderProgram, "uObjectToWorld");
-	    
-	    this.shaderProgram.worldSpaceCameraPos = gl.getUniformLocation(this.shaderProgram, "uWorldSpaceCameraPos");
 	}
 }
 
