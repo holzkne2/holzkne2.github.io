@@ -8,7 +8,7 @@ function toRadians(deg) {
 	
 class Camera {
 	constructor () {
-		this.fov = 45;
+		this.fov = 70;
 		this.near = 0.1;
 		this.far = 100;
 		
