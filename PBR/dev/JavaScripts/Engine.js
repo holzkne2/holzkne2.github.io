@@ -23,8 +23,12 @@ function initGL(canvas) {
 
 function render() {
 	
+	if (options.skyboxDirty()) {
+		skybox.changeSkybox(options.skybox);
+	}
+	
 	// Reflection Probe
-	if (!GlobalProbe.rendered && skybox.texture.texture.loaded)
+	if ((!GlobalProbe.rendered || options.skyboxDirty()) && skybox.texture.texture.loaded)
 	{
 		GlobalProbe.render(gl);
 		GlobalProbe.rendered = true;
@@ -70,7 +74,7 @@ function render() {
 	        
 	    	sphereSingle.meshRenderer.render(gl,
 	    			pMatrix, sphereSingle.WorldMatrix(), vMatrix,
-	    			camera, [1, -0.5, 0.25],
+	    			camera, [0.5, -1, 0.25],
 	    			GlobalProbe.irradianceMap, GlobalProbe.prefilterMap,
 	    			GlobalProbe.brdfLUT.texture);
 	    }

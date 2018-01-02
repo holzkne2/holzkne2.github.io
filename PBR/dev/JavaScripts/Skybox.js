@@ -58,10 +58,24 @@ class Skybox {
 		gl.drawElements(gl.TRIANGLES, this.model.meshes[0].vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 	}
 	
+	changeSkybox(map)
+	{
+		if (map == 0)
+			this.texture = this.texture0;
+		else
+			this.texture = this.texture1;
+	}
+	
 	init(gl) {
-		var texture = new Texture();
-	    texture.init(gl, "Alexs_Apt_8k.jpg");
-		this.texture = texture;
+		var texture0 = new Texture();		
+	    texture0.init(gl, "Alexs_Apt_8k.jpg");
+	    
+	    var texture1 = new Texture();
+	    texture1.init(gl, "Topanga_Forest_B_8k.jpg");
+		
+	    this.texture0 = texture0;
+	    this.texture1 = texture1;
+	    this.texture = texture1;
 		
 		this.model.meshes[0] = new Mesh();
 		this.model.meshes[0].cube();
