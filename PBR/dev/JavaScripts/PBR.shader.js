@@ -30,6 +30,9 @@ uniform vec3 uDirectionalColor;
 in vec3 vNormal;
 in vec3 vWorldPos;
 
+// IBL
+uniform samplerCube uIrradianceMap;
+
 uniform vec3 uAlbedo;
 
 uniform float uMetallic;
@@ -83,6 +86,7 @@ void main(void) {
 
 	vec3 N = normalize(vNormal);
 	vec3 V = normalize(uWorldSpaceCameraPos - vWorldPos);
+	vec3 R = reflect(-V, N);
 	
 	vec3 F0 = vec3(0.04, 0.04, 0.04);
     F0 = mix(F0, albedo, metallic);
@@ -107,7 +111,13 @@ void main(void) {
     float NdotL = max(dot(N, L), 0.0);                
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
     
-    vec3 ambient = vec3(0.03, 0.03, 0.03) * albedo;
+    kS = fresnelSchlick(max(dot(N, V), 0.0), F0);;
+    kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+    vec3 irradiance = texture(uIrradianceMap, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = kD * diffuse;
+    
     vec3 col = ambient + Lo;
     
     col = col / (col + vec3(1.0, 1.0, 1.0));
@@ -115,5 +125,6 @@ void main(void) {
 	col = pow(col, vec3(gamma, gamma, gamma));
     
     fragmentColor = vec4(col, 1.0);
+    //fragmentColor = vec4(irradiance, 1.0);
 }
 `;

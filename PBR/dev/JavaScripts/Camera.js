@@ -22,7 +22,7 @@ class Camera {
 		this.yMinLimit = -20;
 		this.yMaxLimit = 80;
 		
-		this.distanceMin = 6;
+		this.distanceMin = 2;
 		this.distanceMax = 25;
 		
 		this.x = 0;

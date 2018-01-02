@@ -23,6 +23,12 @@ function initGL(canvas) {
 
 function render() {
 	
+	// Reflection Probe
+	{
+		GlobalProbe.render(gl);
+	}
+	
+	
     var pMatrix = mat4.create();
     camera.perspective(mainRenderTexture.textureWidth / mainRenderTexture.textureHeight, pMatrix);
     
@@ -49,7 +55,7 @@ function render() {
 	        var mvpMatrixSkybox = mat4.create();
 	        mat4.multiply(mvpMatrixSkybox, pMatrix, vMatrixSkybox);
 	        
-	        skybox.render(gl, mvpMatrixSkybox, camera);
+	        skybox.render(gl, mvpMatrixSkybox);
 	    }
 	    
 		// Render Objects
@@ -62,7 +68,8 @@ function render() {
 	    	
 	    	sphereSingle.meshRenderer.render(gl,
 	    			pMatrix, sphereSingle.WorldMatrix(), vMatrix,
-	    			camera, [-1, 0.5, 0.25]);
+	    			camera, [-1, 0.5, 0.25],
+	    			GlobalProbe.irradianceMap);
 	    }
     }
     
@@ -123,13 +130,15 @@ function webGLStart() {
     sphereSingle.meshRenderer.model.meshes[0].sphere(1);
     
     sphereSingle.meshRenderer.materials[0] = new PBRMaterial();
-    sphereSingle.meshRenderer.materials[0].albedo = [1.0, 0.0, 0.0];
+    sphereSingle.meshRenderer.materials[0].albedo = [0.5, 0.5, 0.5];
     sphereSingle.meshRenderer.materials[0].metallic = 0.0;
     sphereSingle.meshRenderer.materials[0].roughness = 0.5;
     
     sphereSingle.meshRenderer.init(gl);
     
     skybox.init(gl);
+    
+    GlobalProbe.init(gl, 512);
     
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;

@@ -41,7 +41,7 @@ class Skybox {
 		this.model = new Model();
 	}
 	
-	render(gl, mvpMatrix, camera) {
+	render(gl, mvpMatrix) {
 		gl.useProgram(this.shaderProgram);
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.model.meshes[0].vertexPositionBuffer);
