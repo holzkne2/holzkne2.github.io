@@ -45,7 +45,12 @@ const float PI = 3.14159265359;
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-} 
+}
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}  
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -115,7 +120,7 @@ void main(void) {
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
     //-------------
     
-    F = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);;
     
     kS = F;
     kD = 1.0 - kS;
