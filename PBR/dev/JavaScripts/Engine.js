@@ -67,11 +67,12 @@ function render() {
 //	    	sphereSingle.meshRenderer.materials[0].albedo = [1.0, 0.0, 0.0];
 	        sphereSingle.meshRenderer.materials[0].metallic = options.metallic;
 	        sphereSingle.meshRenderer.materials[0].roughness = options.roughness;
-	    	
+	        
 	    	sphereSingle.meshRenderer.render(gl,
 	    			pMatrix, sphereSingle.WorldMatrix(), vMatrix,
 	    			camera, [1, -0.5, 0.25],
-	    			GlobalProbe.irradianceMap, GlobalProbe.prefilterMap);
+	    			GlobalProbe.irradianceMap, GlobalProbe.prefilterMap,
+	    			GlobalProbe.brdfLUT.texture);
 	    }
     }
     

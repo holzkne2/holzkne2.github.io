@@ -130,8 +130,7 @@ class ReflectionProbe
 		gl.bindFramebuffer(gl.FRAMEBUFFER, this.FBprefilter);
 		this.RBprefilter = gl.createRenderbuffer();
 		gl.bindRenderbuffer(gl.RENDERBUFFER, this.RBprefilter);
-
-//		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, 128, 128);		
+	
 		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
 				gl.RENDERBUFFER, this.RBprefilter);
 		
@@ -150,6 +149,9 @@ class ReflectionProbe
 		
 		this.prefilterMat = new PrefilterMaterial();
 		this.prefilterMat.init(gl);
+		
+		this.brdfLUT = new BrdfLUT();
+		this.brdfLUT.generate(gl, 512);
 	}
 }
 

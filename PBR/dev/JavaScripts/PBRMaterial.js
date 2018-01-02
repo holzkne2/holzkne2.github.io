@@ -34,6 +34,7 @@ class PBRMaterial
 
     	this.shaderProgram.irradianceMap = gl.getUniformLocation(this.shaderProgram, "uIrradianceMap");
     	this.shaderProgram.prefilterMap = gl.getUniformLocation(this.shaderProgram, "uPrefilterMap");
+    	this.shaderProgram.brdfLUT = gl.getUniformLocation(this.shaderProgram, "uBrdfLUT");
     	
 	    this.shaderProgram.albedo = gl.getUniformLocation(this.shaderProgram, "uAlbedo");
 	    

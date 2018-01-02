@@ -33,6 +33,7 @@ in vec3 vWorldPos;
 // IBL
 uniform samplerCube uIrradianceMap;
 uniform samplerCube uPrefilterMap;
+uniform sampler2D uBrdfLUT;
 
 uniform vec3 uAlbedo;
 
@@ -92,6 +93,7 @@ void main(void) {
 	vec3 F0 = vec3(0.04, 0.04, 0.04);
     F0 = mix(F0, albedo, metallic);
     
+    //-------------
     vec3 L = normalize(uLightingDirection);
     vec3 H = normalize(L + V);
     
@@ -111,13 +113,22 @@ void main(void) {
     
     float NdotL = max(dot(N, L), 0.0);                
     vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
+    //-------------
     
-    kS = fresnelSchlick(max(dot(N, V), 0.0), F0);;
+    F = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    
+    kS = F;
     kD = 1.0 - kS;
     kD *= 1.0 - metallic;
     vec3 irradiance = texture(uIrradianceMap, N).rgb;
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = kD * diffuse;
+    
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(uPrefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf  = texture(uBrdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    specular = prefilteredColor * (F * brdf.x + brdf.y);
+    
+    vec3 ambient = kD * diffuse + specular;
     
     vec3 col = ambient + Lo;
     
@@ -126,7 +137,5 @@ void main(void) {
 	col = pow(col, vec3(gamma, gamma, gamma));
     
     fragmentColor = vec4(col, 1.0);
-    fragmentColor = vec4(textureLod(uPrefilterMap, N, 2.0).rgb, 1.0);
-    //fragmentColor = vec4(irradiance, 1.0);
 }
 `;
