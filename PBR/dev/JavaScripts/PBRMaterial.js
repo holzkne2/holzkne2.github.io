@@ -33,6 +33,7 @@ class PBRMaterial
     	gl.enableVertexAttribArray(this.shaderProgram.vertexNormalAttribute);
 
     	this.shaderProgram.irradianceMap = gl.getUniformLocation(this.shaderProgram, "uIrradianceMap");
+    	this.shaderProgram.prefilterMap = gl.getUniformLocation(this.shaderProgram, "uPrefilterMap");
     	
 	    this.shaderProgram.albedo = gl.getUniformLocation(this.shaderProgram, "uAlbedo");
 	    

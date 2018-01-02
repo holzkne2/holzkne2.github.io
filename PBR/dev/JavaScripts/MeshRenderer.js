@@ -5,7 +5,7 @@ class MeshRenderer {
 	}
 	
 	render(gl, pMatrix, mMatrix, mvMatrix, camera, lightingDirection,
-			irradianceMap) {
+			irradianceMap, prefilterMap) {
 		if (typeof this.model == 'undefined' || typeof this.materials.length == 0) {
 			return;
 		}
@@ -45,6 +45,10 @@ class MeshRenderer {
 		    gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_CUBE_MAP, irradianceMap);
 			gl.uniform1i(this.materials[matIndex].shaderProgram.irradianceMap, 0);
+			
+			gl.activeTexture(gl.TEXTURE0 + 1);
+			gl.bindTexture(gl.TEXTURE_CUBE_MAP, prefilterMap);
+			gl.uniform1i(this.materials[matIndex].shaderProgram.prefilterMap, 1);
 		    
 		    // Color
 		    if (this.materials[matIndex].shaderProgram.albedo != null) {

@@ -32,6 +32,7 @@ in vec3 vWorldPos;
 
 // IBL
 uniform samplerCube uIrradianceMap;
+uniform samplerCube uPrefilterMap;
 
 uniform vec3 uAlbedo;
 
@@ -125,6 +126,7 @@ void main(void) {
 	col = pow(col, vec3(gamma, gamma, gamma));
     
     fragmentColor = vec4(col, 1.0);
+    fragmentColor = vec4(textureLod(uPrefilterMap, N, 2.0).rgb, 1.0);
     //fragmentColor = vec4(irradiance, 1.0);
 }
 `;

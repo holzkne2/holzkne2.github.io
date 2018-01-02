@@ -46,6 +46,32 @@ class ReflectionProbe
 			this.irradianceMat.render(gl, skybox.model, mvp, this.enviromentMap);
 		}
 		
+		// Render Prefilter Cube Map
+		gl.bindFramebuffer(gl.FRAMEBUFFER, this.FBprefilter);
+		var maxMipLvls = 5;
+		for (var mip = 0; mip < maxMipLvls; mip++) {
+			var mipWidth = 128 * Math.pow(0.5, mip);
+			var mipHeight = 128 * Math.pow(0.5, mip);
+			
+			gl.bindRenderbuffer(gl.RENDERBUFFER, this.RBprefilter);
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, mipWidth, mipHeight);
+			gl.viewport(0, 0, mipWidth, mipHeight);
+			
+			var roughness = mip / (maxMipLvls - 1);
+			for (var i = 0; i < 6; i++) {
+				var mvp = mat4.create();
+				mat4.multiply(mvp, pMatrix, captureViews[i]);
+				
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+						gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, this.prefilterMap, mip);
+				
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+				
+				this.prefilterMat.render(gl, skybox.model, mvp, this.enviromentMap, roughness);
+			}
+		}
+		
+		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	}
 	
@@ -80,7 +106,7 @@ class ReflectionProbe
 		this.RBirradiance = gl.createRenderbuffer();
 		gl.bindRenderbuffer(gl.RENDERBUFFER, this.RBirradiance);
 		
-		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 32, 32);		
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, 32, 32);		
 		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
 				gl.RENDERBUFFER, this.RBirradiance);
 		
@@ -98,6 +124,32 @@ class ReflectionProbe
 		
 		this.irradianceMat = new IrradianceMaterial();
 		this.irradianceMat.init(gl);
+		
+		// Create Prefilter Cube Map
+		this.FBprefilter = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, this.FBprefilter);
+		this.RBprefilter = gl.createRenderbuffer();
+		gl.bindRenderbuffer(gl.RENDERBUFFER, this.RBprefilter);
+
+//		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, 128, 128);		
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+				gl.RENDERBUFFER, this.RBprefilter);
+		
+		this.prefilterMap = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.prefilterMap);
+		for (var i = 0; i < 6; i++) {
+			gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+					gl.RGBA, 128, 128, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		}
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+		gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+		
+		this.prefilterMat = new PrefilterMaterial();
+		this.prefilterMat.init(gl);
 	}
 }
 

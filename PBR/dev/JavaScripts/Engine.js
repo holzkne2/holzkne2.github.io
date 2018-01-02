@@ -24,8 +24,10 @@ function initGL(canvas) {
 function render() {
 	
 	// Reflection Probe
+	if (!GlobalProbe.rendered && skybox.texture.texture.loaded)
 	{
 		GlobalProbe.render(gl);
+		GlobalProbe.rendered = true;
 	}
 	
 	
@@ -68,8 +70,8 @@ function render() {
 	    	
 	    	sphereSingle.meshRenderer.render(gl,
 	    			pMatrix, sphereSingle.WorldMatrix(), vMatrix,
-	    			camera, [-1, 0.5, 0.25],
-	    			GlobalProbe.irradianceMap);
+	    			camera, [1, -0.5, 0.25],
+	    			GlobalProbe.irradianceMap, GlobalProbe.prefilterMap);
 	    }
     }
     
@@ -138,7 +140,8 @@ function webGLStart() {
     
     skybox.init(gl);
     
-    GlobalProbe.init(gl, 512);
+    GlobalProbe.init(gl, 256);
+    GlobalProbe.rendered = false;
     
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;

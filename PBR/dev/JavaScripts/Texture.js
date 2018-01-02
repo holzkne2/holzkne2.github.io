@@ -8,6 +8,8 @@ function handleLoadedTexture(gl, texture) {
     gl.generateMipmap(gl.TEXTURE_2D);
     
     gl.bindTexture(gl.TEXTURE_2D, null);
+    
+    texture.loaded = true;
 }
 
 class Texture {
@@ -25,6 +27,7 @@ class Texture {
 		this.texture = gl.createTexture();
 		this.texture.image = new Image();
 		var temp = this.texture;
+		temp.loaded = false;
 		
 		this.texture.image.onload = function () {
 	        handleLoadedTexture(gl, temp);
