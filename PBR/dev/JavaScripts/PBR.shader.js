@@ -126,14 +126,14 @@ void main(void) {
     kD = 1.0 - kS;
     kD *= 1.0 - metallic;
     vec3 irradiance = texture(uIrradianceMap, N).rgb;
-    vec3 diffuse = irradiance * albedo;
+    vec3 diffuse = irradiance * albedo * 0.1;
     
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(uPrefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
     vec2 brdf  = texture(uBrdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
     specular = prefilteredColor * (F * brdf.x + brdf.y);
     
-    vec3 ambient = kD * diffuse + specular;
+    vec3 ambient = (kD * diffuse + specular);
     
     vec3 col = ambient + Lo;
     
